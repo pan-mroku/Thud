@@ -1,0 +1,20 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+PROJECT(Thud)
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -g")
+
+#SET(wxWidgets_CONFIGURATION gtk)
+FIND_PACKAGE(wxWidgets COMPONENTS core base REQUIRED)
+
+INCLUDE(${wxWidgets_USE_FILE})
+
+SET(HEADERS mainwindow.h gui.h app.hpp)
+SET(SOURCES mainwindow.cpp gui.cpp app.cpp)
+
+ADD_EXECUTABLE(${PROJECT_NAME}
+  ${HEADERS}
+  ${SOURCES}
+  )
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${wxWidgets_LIBRARIES})
