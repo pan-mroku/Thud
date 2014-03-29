@@ -79,7 +79,7 @@
             <event name="OnSetFocus"></event>
             <event name="OnSize"></event>
             <event name="OnUpdateUI"></event>
-            <object class="wxGridSizer" expanded="0">
+            <object class="wxGridSizer" expanded="1">
                 <property name="cols">2</property>
                 <property name="hgap">0</property>
                 <property name="minimum_size"></property>
@@ -87,26 +87,31 @@
                 <property name="permission">none</property>
                 <property name="rows">2</property>
                 <property name="vgap">0</property>
-                <object class="sizeritem" expanded="0">
+                <object class="sizeritem" expanded="1">
                     <property name="border">5</property>
                     <property name="flag">wxALL|wxEXPAND</property>
                     <property name="proportion">0</property>
-                    <object class="wxPanel" expanded="0">
+                    <object class="CustomControl" expanded="1">
                         <property name="bg"></property>
+                        <property name="class">osgControl</property>
+                        <property name="construction">CustomRenderControl=new osgControl();</property>
                         <property name="context_help"></property>
                         <property name="context_menu">1</property>
+                        <property name="declaration">osgControl* CustomRenderControl;</property>
                         <property name="enabled">1</property>
                         <property name="fg"></property>
                         <property name="font"></property>
                         <property name="hidden">0</property>
                         <property name="id">wxID_ANY</property>
+                        <property name="include">#include &quot;osgcontrol.hpp&quot;</property>
                         <property name="maximum_size"></property>
                         <property name="minimum_size"></property>
-                        <property name="name">PanelRender</property>
+                        <property name="name">CustomRenderControl</property>
                         <property name="permission">protected</property>
                         <property name="pos"></property>
+                        <property name="settings"></property>
                         <property name="size"></property>
-                        <property name="subclass"></property>
+                        <property name="subclass">wxControl; </property>
                         <property name="tooltip"></property>
                         <property name="validator_data_type"></property>
                         <property name="validator_style">wxFILTER_NONE</property>
@@ -114,7 +119,7 @@
                         <property name="validator_variable"></property>
                         <property name="window_extra_style"></property>
                         <property name="window_name"></property>
-                        <property name="window_style">wxTAB_TRAVERSAL</property>
+                        <property name="window_style"></property>
                         <event name="OnChar"></event>
                         <event name="OnEnterWindow"></event>
                         <event name="OnEraseBackground"></event>

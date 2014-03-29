@@ -8,7 +8,9 @@
 #ifndef __mainwindow__
 #define __mainwindow__
 
-#include <wx/panel.h>
+class wxControl;
+
+#include "osgcontrol.hpp"
 #include <wx/gdicmn.h>
 #include <wx/font.h>
 #include <wx/colour.h>
@@ -29,7 +31,7 @@ class MainWindow : public wxFrame
 	private:
 	
 	protected:
-		wxPanel* PanelRender;
+		osgControl* CustomRenderControl;
 		wxButton* ButtonQuit;
 		
 		// Virtual event handlers, overide them in your derived class
