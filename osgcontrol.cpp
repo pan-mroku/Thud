@@ -1,11 +1,15 @@
 #include "osgcontrol.hpp"
 
-osgCanvas::osgCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name, int *attributes) : wxGLCanvas(parent, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name, attributes)
+#include <wx/dcclient.h>
+
+osgCanvas::osgCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name, int *attributes) : wxGLCanvas(parent, id, attributes, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name)
 {
+Context=new wxGLContext(this);
 }
 
 osgCanvas::~osgCanvas()
 {
+delete Context;
 }
 
 void osgCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
@@ -14,7 +18,7 @@ void osgCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
   wxPaintDC dc(this);
 }
 
-void osgCanvas::OnSize(wxSizeEvent& event)
+/*void osgCanvas::OnSize(wxSizeEvent& event)
 {
   // this is also necessary to update the context on some platforms
   wxGLCanvas::OnSize(event);
@@ -29,7 +33,7 @@ void osgCanvas::OnSize(wxSizeEvent& event)
       _graphics_window->getEventQueue()->windowResize(0, 0, width, height);
       _graphics_window->resized(0,0,width,height);
     }
-}
+    }
 
 void osgCanvas::OnChar(wxKeyEvent &event)
 {
@@ -101,7 +105,78 @@ void osgCanvas::OnMouseWheel(wxMouseEvent &event)
                                                    osgGA::GUIEventAdapter::SCROLL_UP :
                                                    osgGA::GUIEventAdapter::SCROLL_DOWN);
   }
-}
+  }*/
 
 //-------------------------------------------------------------------------------------
+
+wxGraphicsWindow::wxGraphicsWindow(osgCanvas *canvas)
+{
+  Canvas = canvas;
+
+  _traits = new GraphicsContext::Traits;
+
+  wxPoint pos = Canvas->GetPosition();
+  wxSize size = Canvas->GetSize();
+
+  _traits->x = pos.x;
+  _traits->y = pos.y;
+  _traits->width = size.x;
+  _traits->height = size.y;
+
+  init();
+}
+
+wxGraphicsWindow::~wxGraphicsWindow()
+{
+}
+
+void wxGraphicsWindow::init()
+{
+  if (valid())
+    {
+      setState( new osg::State );
+      getState()->setGraphicsContext(this);
+
+      if (_traits.valid() && _traits->sharedContext.valid())
+        {
+          getState()->setContextID( _traits->sharedContext->getState()->getContextID() );
+          incrementContextIDUsageCount( getState()->getContextID() );
+        }
+      else
+        {
+          getState()->setContextID( osg::GraphicsContext::createNewContextID() );
+        }
+    }
+}
+
+void wxGraphicsWindow::grabFocus()
+{
+  // focus the canvas
+  Canvas->SetFocus();
+}
+
+void wxGraphicsWindow::grabFocusIfPointerInWindow()
+{
+  // focus this window, if the pointer is in the window
+  wxPoint pos = wxGetMousePosition();
+  if (wxFindWindowAtPoint(pos) == Canvas)
+    Canvas->SetFocus();
+}
+
+void wxGraphicsWindow::useCursor(bool cursorOn)
+{
+//Canvas->UseCursor(cursorOn);
+
+}
+
+bool wxGraphicsWindow::makeCurrentImplementation()
+{
+Canvas->SetCurrent(*Canvas->Context);
+return true;
+}
+
+void wxGraphicsWindow::swapBuffersImplementation()
+{
+  Canvas->SwapBuffers();
+}
 

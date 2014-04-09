@@ -16,8 +16,8 @@ public:
   virtual ~osgCanvas();
 
   void OnPaint(wxPaintEvent& event);
-  void OnSize(wxSizeEvent& event);
-  //void OnEraseBackground(wxEraseEvent& event); /* Do nothing, to avoid flashing on MSW */
+  /*void OnSize(wxSizeEvent& event);
+  //void OnEraseBackground(wxEraseEvent& event); // Do nothing, to avoid flashing on MSW
 
   void OnChar(wxKeyEvent &event);
   void OnKeyUp(wxKeyEvent &event);
@@ -26,9 +26,10 @@ public:
   void OnMouseDown(wxMouseEvent &event);
   void OnMouseUp(wxMouseEvent &event);
   void OnMouseMotion(wxMouseEvent &event);
-  void OnMouseWheel(wxMouseEvent &event);
+  void OnMouseWheel(wxMouseEvent &event);*/
 
   osg::ref_ptr<osgViewer::GraphicsWindow> _graphics_window;
+  wxGLContext* Context;
 
 };
 
@@ -39,7 +40,7 @@ class wxGraphicsWindow : public osgViewer::GraphicsWindow
 public:
   osgCanvas* Canvas;
 
-  wxGraphicsWindow(osgCanvas* canvas);
+  wxGraphicsWindow(osgCanvas* canvas=NULL);
   ~wxGraphicsWindow();
 
   void init();

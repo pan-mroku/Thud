@@ -31,7 +31,7 @@ class MainWindow : public wxFrame
 	private:
 	
 	protected:
-		osgControl* CustomRenderControl;
+		osg::ref_ptr<osgViewer::Viewer> osgViewer;
 		wxButton* ButtonQuit;
 		
 		// Virtual event handlers, overide them in your derived class

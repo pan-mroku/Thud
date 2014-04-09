@@ -16,8 +16,8 @@ MainWindow::MainWindow( wxWindow* parent, wxWindowID id, const wxString& title, 
 	wxGridSizer* SizerMain;
 	SizerMain = new wxGridSizer( 2, 2, 0, 0 );
 	
-	CustomRenderControl=new osgControl();
-	SizerMain->Add( CustomRenderControl, 0, wxALL|wxEXPAND, 5 );
+	
+	SizerMain->Add( 800,600, 0, wxALL|wxEXPAND, 5 );
 	
 	ButtonQuit = new wxButton( this, wxID_ANY, wxT("MyButton"), wxDefaultPosition, wxDefaultSize, 0 );
 	SizerMain->Add( ButtonQuit, 1, wxALIGN_CENTER|wxALL|wxEXPAND, 5 );

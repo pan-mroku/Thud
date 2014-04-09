@@ -93,11 +93,11 @@
                     <property name="proportion">0</property>
                     <object class="CustomControl" expanded="1">
                         <property name="bg"></property>
-                        <property name="class">osgControl</property>
-                        <property name="construction">CustomRenderControl=new osgControl();</property>
+                        <property name="class"></property>
+                        <property name="construction"></property>
                         <property name="context_help"></property>
                         <property name="context_menu">1</property>
-                        <property name="declaration">osgControl* CustomRenderControl;</property>
+                        <property name="declaration">osg::ref_ptr&lt;osgViewer::Viewer&gt; osgViewer;</property>
                         <property name="enabled">1</property>
                         <property name="fg"></property>
                         <property name="font"></property>
@@ -106,7 +106,7 @@
                         <property name="include">#include &quot;osgcontrol.hpp&quot;</property>
                         <property name="maximum_size"></property>
                         <property name="minimum_size"></property>
-                        <property name="name">CustomRenderControl</property>
+                        <property name="name">osgViewer</property>
                         <property name="permission">protected</property>
                         <property name="pos"></property>
                         <property name="settings"></property>
