@@ -1,15 +1,16 @@
 #include "osgcontrol.hpp"
 
 #include <wx/dcclient.h>
+#include <iostream>
 
 osgCanvas::osgCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name, int *attributes) : wxGLCanvas(parent, id, attributes, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name)
 {
-Context=new wxGLContext(this);
+  Context=new wxGLContext(this);
 }
 
 osgCanvas::~osgCanvas()
 {
-delete Context;
+  delete Context;
 }
 
 void osgCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
@@ -18,24 +19,7 @@ void osgCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
   wxPaintDC dc(this);
 }
 
-/*void osgCanvas::OnSize(wxSizeEvent& event)
-{
-  // this is also necessary to update the context on some platforms
-  wxGLCanvas::OnSize(event);
-
-  // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
-  int width, height;
-  GetClientSize(&width, &height);
-
-  if (_graphics_window.valid())
-    {
-      // update the window dimensions, in case the window has been resized.
-      _graphics_window->getEventQueue()->windowResize(0, 0, width, height);
-      _graphics_window->resized(0,0,width,height);
-    }
-    }
-
-void osgCanvas::OnChar(wxKeyEvent &event)
+/*void osgCanvas::OnChar(wxKeyEvent &event)
 {
 #if wxUSE_UNICODE
   int key = event.GetUnicodeKey();
@@ -137,7 +121,7 @@ void wxGraphicsWindow::init()
       setState( new osg::State );
       getState()->setGraphicsContext(this);
 
-      if (_traits.valid() && _traits->sharedContext.valid())
+      if (_traits.valid() && _traits->sharedContext && _traits->sharedContext->valid())
         {
           getState()->setContextID( _traits->sharedContext->getState()->getContextID() );
           incrementContextIDUsageCount( getState()->getContextID() );
@@ -180,3 +164,6 @@ void wxGraphicsWindow::swapBuffersImplementation()
   Canvas->SwapBuffers();
 }
 
+BEGIN_EVENT_TABLE(osgCanvas, wxGLCanvas)
+EVT_PAINT               (osgCanvas::OnPaint)
+END_EVENT_TABLE()

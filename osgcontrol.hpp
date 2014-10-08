@@ -14,22 +14,20 @@ public:
             int *attributes = 0);
 
   virtual ~osgCanvas();
-
   void OnPaint(wxPaintEvent& event);
-  /*void OnSize(wxSizeEvent& event);
+
   //void OnEraseBackground(wxEraseEvent& event); // Do nothing, to avoid flashing on MSW
-
-  void OnChar(wxKeyEvent &event);
+  /*void OnChar(wxKeyEvent &event);
   void OnKeyUp(wxKeyEvent &event);
-
   void OnMouseEnter(wxMouseEvent &event);
   void OnMouseDown(wxMouseEvent &event);
   void OnMouseUp(wxMouseEvent &event);
   void OnMouseMotion(wxMouseEvent &event);
   void OnMouseWheel(wxMouseEvent &event);*/
-
+  
   osg::ref_ptr<osgViewer::GraphicsWindow> _graphics_window;
   wxGLContext* Context;
+    DECLARE_EVENT_TABLE()
 
 };
 

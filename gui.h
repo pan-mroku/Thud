@@ -23,7 +23,6 @@ class GUI : public MainWindow
 
   void SetViewer(osgViewer::Viewer *viewer);
   void OnIdle(wxIdleEvent& event);
-	
 };
 
 #endif // __gui__

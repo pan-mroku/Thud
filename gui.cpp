@@ -1,10 +1,9 @@
 #include "gui.h"
 
-GUI::GUI( wxWindow* parent )
-:
-MainWindow( parent )
+GUI::GUI( wxWindow* parent ):
+  MainWindow( parent )
 {
-
+  Bind(wxEVT_IDLE, &GUI::OnIdle, this);
 }
 
 void GUI::m_button1OnButtonClick( wxCommandEvent& event )

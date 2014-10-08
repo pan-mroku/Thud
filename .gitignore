@@ -3,3 +3,6 @@ CMakeFiles/
 Makefile
 Thud
 cmake_install.cmake
+*~
+*.exe
+*.bat
