@@ -21,23 +21,21 @@ bool App::OnInit()
   attributes[5] = 8;
   attributes[6] = 0;
   
-osgCanvas* canvas=new osgCanvas(gui, wxID_ANY, wxDefaultPosition, wxSize(800,600), wxSUNKEN_BORDER, wxT("osgviewerWX"), attributes);
-
-  wxGraphicsWindow* gw=new wxGraphicsWindow(canvas);
-  canvas->_graphics_window=gw;
+  osgCanvas* canvas=new osgCanvas(gui, wxID_ANY, wxDefaultPosition, wxSize(1024, 768), wxSUNKEN_BORDER, wxT("osgviewerWX"), attributes);
 
   osgViewer::Viewer* viewer=new osgViewer::Viewer;
-  viewer->getCamera()->setGraphicsContext(gw);
-  viewer->getCamera()->setViewport(0,0,800,600);
+  viewer->getCamera()->setGraphicsContext(canvas);
+  viewer->getCamera()->setViewport(0,0,1024,768);
   viewer->addEventHandler(new osgViewer::StatsHandler);
   viewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
 
   osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile("models/monkey.obj");
   viewer->setSceneData(loadedModel.get());
   viewer->setCameraManipulator(new osgGA::TrackballManipulator);
+  viewer->realize();
+
   gui->SetViewer(viewer);
 
-  gui->Centre();
   gui->Show(true);
 
   return true;

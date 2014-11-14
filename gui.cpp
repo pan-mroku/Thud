@@ -1,4 +1,5 @@
 #include "gui.h"
+#include <iostream>
 
 GUI::GUI( wxWindow* parent ):
   MainWindow( parent )
@@ -22,6 +23,6 @@ void GUI::OnIdle(wxIdleEvent &event)
         return;
 
     osgViewer->frame();
-
+    
     event.RequestMore();
 }

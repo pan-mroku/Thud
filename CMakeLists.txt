@@ -18,8 +18,8 @@ INCLUDE_DIRECTORIES(${OSGDB_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OSGGA_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OPENTHREADS_INCLUDE_DIR})
 
-SET(HEADERS mainwindow.h gui.h app.hpp osgcontrol.hpp)
-SET(SOURCES mainwindow.cpp gui.cpp app.cpp osgcontrol.cpp)
+SET(HEADERS mainwindow.h gui.h app.hpp osgcanvas.hpp)
+SET(SOURCES mainwindow.cpp gui.cpp app.cpp osgcanvas.cpp)
 
 ADD_EXECUTABLE(${PROJECT_NAME}
   ${HEADERS}
