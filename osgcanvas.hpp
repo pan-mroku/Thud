@@ -21,6 +21,9 @@ public:
   void OnMouseDown(wxMouseEvent &event);
   void OnMouseUp(wxMouseEvent &event);
   void OnMouseMotion(wxMouseEvent &event);
+  void OnMouseWheel(wxMouseEvent& event);
+  void OnKeyDown(wxKeyEvent& event);
+  void OnKeyUp(wxKeyEvent& event);
 
   wxGLContext* Context;
 

@@ -1,6 +1,6 @@
 #include "app.hpp"
 #include "gui.h"
-#include "osgcontrol.hpp"
+#include "osgcanvas.hpp"
 
 #include<osgDB/ReadFile>
 #include <osgViewer/ViewerEventHandlers>
@@ -32,11 +32,11 @@ bool App::OnInit()
   osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile("models/monkey.obj");
   viewer->setSceneData(loadedModel.get());
   viewer->setCameraManipulator(new osgGA::TrackballManipulator);
-  viewer->realize();
 
   gui->SetViewer(viewer);
 
   gui->Show(true);
+  canvas->SetFocus();
 
   return true;
 }

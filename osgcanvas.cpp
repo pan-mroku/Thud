@@ -13,6 +13,9 @@ osgCanvas::osgCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const 
   wxGLCanvas::Bind(wxEVT_LEFT_UP, &osgCanvas::OnMouseUp, this);
   wxGLCanvas::Bind(wxEVT_MOTION, &osgCanvas::OnMouseMotion, this);
   wxGLCanvas::Bind(wxEVT_LEFT_DOWN, &osgCanvas::OnMouseDown, this);
+  wxGLCanvas::Bind(wxEVT_CHAR, &osgCanvas::OnKeyDown, this);
+  wxGLCanvas::Bind(wxEVT_KEY_UP, &osgCanvas::OnKeyUp, this);
+  wxGLCanvas::Bind(wxEVT_MOUSEWHEEL, &osgCanvas::OnMouseWheel, this);
 
   _traits = new GraphicsContext::Traits;
 
@@ -33,8 +36,6 @@ osgCanvas::osgCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const 
     {
       GraphicsWindow::getState()->setContextID( osg::GraphicsContext::createNewContextID() );
     }
-
-  GraphicsWindow::requestContinuousUpdate(true);
 }
 
 osgCanvas::~osgCanvas()
@@ -66,6 +67,35 @@ void osgCanvas::OnMouseMotion(wxMouseEvent &event)
   GraphicsWindow::getEventQueue()->mouseMotion(event.GetX(), event.GetY());
 }
 
+void osgCanvas::OnMouseWheel(wxMouseEvent& event)
+{
+  int delta = event.GetWheelRotation() / event.GetWheelDelta() * event.GetLinesPerAction();
+  if(delta>0)
+    GraphicsWindow::getEventQueue()->mouseScroll(osgGA::GUIEventAdapter::SCROLL_UP);
+  else
+    GraphicsWindow::getEventQueue()->mouseScroll(osgGA::GUIEventAdapter::SCROLL_DOWN);
+}
+
+void osgCanvas::OnKeyDown(wxKeyEvent& event)
+{
+#if wxUSE_UNICODE
+  int key = event.GetUnicodeKey();
+#else
+  int key = event.GetKeyCode();
+#endif
+  GraphicsWindow::getEventQueue()->keyPress(key);
+}
+
+void osgCanvas::OnKeyUp(wxKeyEvent& event)
+{
+#if wxUSE_UNICODE
+  int key = event.GetUnicodeKey();
+#else
+  int key = event.GetKeyCode();
+#endif
+  GraphicsWindow::getEventQueue()->keyRelease(key);
+}
+
 bool osgCanvas::makeCurrentImplementation()
 {
   wxGLCanvas::SetCurrent(*Context);
@@ -84,4 +114,3 @@ void osgCanvas::grabFocusIfPointerInWindow()
   if (wxFindWindowAtPoint(pos) == this)
     SetFocus();
 }
-
