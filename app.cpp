@@ -1,10 +1,12 @@
 #include "app.hpp"
 #include "gui.h"
 #include "osgcanvas.hpp"
+#include "scene.hpp"
 
-#include<osgDB/ReadFile>
+#include <osgDB/ReadFile>
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/TrackballManipulator>
+#include <osg/Node>
 
 IMPLEMENT_APP(App)
 
@@ -29,8 +31,12 @@ bool App::OnInit()
   viewer->addEventHandler(new osgViewer::StatsHandler);
   viewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
 
-  osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile("models/monkey.obj");
-  viewer->setSceneData(loadedModel.get());
+  osgDB::ReaderWriter::Options* options = new osgDB::ReaderWriter::Options();
+  options->setObjectCacheHint(osgDB::ReaderWriter::Options::CACHE_ALL);
+  osgDB::Registry::instance()->setOptions(options);
+
+  Scene s;
+  viewer->setSceneData(s.GroupNode);
   viewer->setCameraManipulator(new osgGA::TrackballManipulator);
 
   gui->SetViewer(viewer);
