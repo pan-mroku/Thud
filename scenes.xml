@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<scenes>
+  <scene title="first" objecta="models/monkey.obj" objectb="models/monkey.obj" />
+  <scene title="second" objecta="models/monkey.obj" objectb="models/monkey.obj" />
+</scenes>

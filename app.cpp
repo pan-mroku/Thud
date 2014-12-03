@@ -1,12 +1,14 @@
 #include "app.hpp"
 #include "gui.h"
 #include "osgcanvas.hpp"
-#include "scene.hpp"
+
 
 #include <osgDB/ReadFile>
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/TrackballManipulator>
 #include <osg/Node>
+
+#include <tinyxml2.h>
 
 IMPLEMENT_APP(App)
 
@@ -35,8 +37,18 @@ bool App::OnInit()
   options->setObjectCacheHint(osgDB::ReaderWriter::Options::CACHE_ALL);
   osgDB::Registry::instance()->setOptions(options);
 
-  Scene s;
-  viewer->setSceneData(s.GroupNode);
+  tinyxml2::XMLDocument configDocument;
+  configDocument.LoadFile("./scenes.xml");
+  tinyxml2::XMLNode*  configRoot = configDocument.RootElement();
+  tinyxml2::XMLElement* sceneElement = configRoot->FirstChildElement("scene");
+  for(tinyxml2::XMLElement* sceneElement = configRoot->FirstChildElement("scene"); sceneElement!=NULL; sceneElement=sceneElement->NextSiblingElement())
+    {
+      std::string modelA=sceneElement->Attribute("objecta");
+      std::string modelB=sceneElement->Attribute("objectb");
+      Scenes.push_back(Scene(modelA, modelB));
+    }
+	
+  viewer->setSceneData(Scenes[0].GroupNode);
   viewer->setCameraManipulator(new osgGA::TrackballManipulator);
 
   gui->SetViewer(viewer);
