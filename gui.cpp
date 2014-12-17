@@ -5,6 +5,7 @@ GUI::GUI( wxWindow* parent ):
   MainWindow( parent )
 {
   Bind(wxEVT_IDLE, &GUI::OnIdle, this);
+  Timer.reset();
 }
 
 void GUI::m_button1OnButtonClick( wxCommandEvent& event )
@@ -21,6 +22,9 @@ void GUI::OnIdle(wxIdleEvent &event)
 {
     if (!osgViewer->isRealized())
         return;
+
+    physicsEngine.Tick(*CurrentScene, Timer.elapsedTime_m());
+    Timer.reset();
 
     osgViewer->frame();
     

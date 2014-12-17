@@ -10,6 +10,7 @@ class Object
 public:
   osg::ref_ptr<osg::Node> Model;
   osg::ref_ptr<osg::PositionAttitudeTransform> PAT;
+  osg::Vec3d MoveVector;
 
   Object(const std::string& filename);
 };

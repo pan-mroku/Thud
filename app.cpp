@@ -45,10 +45,11 @@ bool App::OnInit()
     {
       std::string modelA=sceneElement->Attribute("objecta");
       std::string modelB=sceneElement->Attribute("objectb");
-      Scenes.push_back(Scene(modelA, modelB));
+      gui->Scenes.push_back(Scene(modelA, modelB));
     }
 	
-  viewer->setSceneData(Scenes[0].GroupNode);
+  viewer->setSceneData(gui->Scenes[0].GroupNode);
+  gui->CurrentScene=&(gui->Scenes[0]);
   viewer->setCameraManipulator(new osgGA::TrackballManipulator);
 
   gui->SetViewer(viewer);
@@ -58,3 +59,4 @@ bool App::OnInit()
 
   return true;
 }
+

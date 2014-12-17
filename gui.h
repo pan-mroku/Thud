@@ -10,12 +10,17 @@
 
 //// end generated include
 
+#include "physics.hpp"
+#include <osg/Timer>
+#include <vector>
+
 /** Implementing MainWindow */
 class GUI : public MainWindow
 {
  protected:
   // Handlers for MainWindow events.
   void m_button1OnButtonClick( wxCommandEvent& event );
+  Physics physicsEngine;
  public:
   /** Constructor */
   GUI( wxWindow* parent = NULL);
@@ -23,6 +28,10 @@ class GUI : public MainWindow
 
   void SetViewer(osgViewer::Viewer *viewer);
   void OnIdle(wxIdleEvent& event);
+
+  osg::ElapsedTime Timer;
+  std::vector<Scene> Scenes;
+  Scene* CurrentScene;
 };
 
 #endif // __gui__
