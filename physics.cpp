@@ -7,7 +7,7 @@
 #include <osg/Geometry>
 
 Physics::Physics():
-  ActiveAlgorithm(Triangle)
+  ActiveAlgorithm(COLLISION_ALGORITHM_TRIANGLE)
 {
 }
 
@@ -26,13 +26,13 @@ bool Physics::CheckCollision(const Scene& scene)
 {
   switch(ActiveAlgorithm)
     {
-    case None:
+    case COLLISION_ALGORITHM_NONE:
       return false;
       break;
-    case Triangle:
+    case COLLISION_ALGORITHM_TRIANGLE:
       return TriangleCollisionAlgorithm(scene);
       break;
-    case OpenCL:
+    case COLLISION_ALGORITHM_OPENCL:
       return OpenCLCollisionAlgorithm(scene);
       break;
     }

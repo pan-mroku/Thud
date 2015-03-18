@@ -10,9 +10,9 @@ public:
 
   typedef enum
     {
-      None,
-      Triangle,
-      OpenCL
+      COLLISION_ALGORITHM_NONE,
+      COLLISION_ALGORITHM_TRIANGLE,
+      COLLISION_ALGORITHM_OPENCL
     } CollisionAlgorithmEnum;
   CollisionAlgorithmEnum ActiveAlgorithm;
   
