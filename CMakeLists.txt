@@ -21,8 +21,8 @@ INCLUDE_DIRECTORIES(${OSGGA_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OPENTHREADS_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${TinyXML2_INCLUDE_DIR})
 
-SET(HEADERS gui.hpp app.hpp osgcanvas.hpp object.hpp scene.hpp physics.hpp)
-SET(SOURCES gui.cpp app.cpp osgcanvas.cpp object.cpp scene.cpp physics.cpp)
+SET(HEADERS gui.hpp app.hpp osgcanvas.hpp object.hpp scene.hpp physics.hpp opttritri.hpp)
+SET(SOURCES gui.cpp app.cpp osgcanvas.cpp object.cpp scene.cpp physics.cpp opttritri.cpp)
 
 ADD_EXECUTABLE(${PROJECT_NAME}
   ${HEADERS}

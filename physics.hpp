@@ -6,9 +6,22 @@
 class Physics
 {
 public:
-  Physics(){};
+  Physics();
+
+  typedef enum
+    {
+      None,
+      Triangle,
+      OpenCL
+    } CollisionAlgorithmEnum;
+  CollisionAlgorithmEnum ActiveAlgorithm;
   
   void Tick(Scene& scene, const double& miliseconds);
+
+  bool CheckCollision(const Scene& scene);
+  bool TriangleCollisionAlgorithm(const Scene& scene);
+  bool OpenCLCollisionAlgorithm(const Scene& scene);
+
 protected:
 private:
 };

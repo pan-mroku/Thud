@@ -29,6 +29,7 @@ void Gui::OnIdle(wxIdleEvent &event)
   if (!osgViewer->isRealized())
     return;
 
+  physicsEngine.CheckCollision(*CurrentScene);
   physicsEngine.Tick(*CurrentScene, Timer.elapsedTime_m());
   Timer.reset();
 
