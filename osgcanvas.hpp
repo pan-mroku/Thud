@@ -8,10 +8,11 @@ class osgCanvas : public wxGLCanvas, public osgViewer::GraphicsWindow
 {
 public:
   osgCanvas(wxWindow *parent, wxWindowID id = wxID_ANY,
+            int *attributes = 0,
             const wxPoint& pos = wxDefaultPosition,
             const wxSize& size = wxDefaultSize, long style = 0,
-            const wxString& name = wxT("TestGLCanvas"),
-            int *attributes = 0);
+            const wxString& name = wxT("TestGLCanvas")
+            );
 
   virtual ~osgCanvas();
   void OnPaint(wxPaintEvent& event);

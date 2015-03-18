@@ -4,7 +4,8 @@ PROJECT(Thud)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -g")
 
-FIND_PACKAGE(wxWidgets COMPONENTS core base gl REQUIRED)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules)
+FIND_PACKAGE(wxWidgets COMPONENTS core base gl xrc REQUIRED)
 FIND_PACKAGE(osg REQUIRED)
 FIND_PACKAGE(osgViewer REQUIRED)
 FIND_PACKAGE(osgDB REQUIRED)
@@ -20,8 +21,8 @@ INCLUDE_DIRECTORIES(${OSGGA_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${OPENTHREADS_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${TinyXML2_INCLUDE_DIR})
 
-SET(HEADERS mainwindow.h gui.h app.hpp osgcanvas.hpp object.hpp scene.hpp physics.hpp)
-SET(SOURCES mainwindow.cpp gui.cpp app.cpp osgcanvas.cpp object.cpp scene.cpp physics.cpp)
+SET(HEADERS gui.hpp app.hpp osgcanvas.hpp object.hpp scene.hpp physics.hpp)
+SET(SOURCES gui.cpp app.cpp osgcanvas.cpp object.cpp scene.cpp physics.cpp)
 
 ADD_EXECUTABLE(${PROJECT_NAME}
   ${HEADERS}

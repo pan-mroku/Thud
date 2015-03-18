@@ -5,7 +5,7 @@
 
 using namespace osgViewer;
 
-osgCanvas::osgCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxString& name, int *attributes):
+osgCanvas::osgCanvas(wxWindow *parent, wxWindowID id, int *attributes, const wxPoint& pos, const wxSize& size, long style, const wxString& name):
   wxGLCanvas(parent, id, attributes, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name)
 {
   Context=new wxGLContext(this);
@@ -27,7 +27,7 @@ osgCanvas::osgCanvas(wxWindow *parent, wxWindowID id, const wxPoint& pos, const 
   GraphicsWindow::setState( new osg::State );
   GraphicsWindow::getState()->setGraphicsContext(this);
 
-  if (_traits && _traits->sharedContext)
+  if (_traits && _traits->sharedContext.valid())
     {
       GraphicsWindow::getState()->setContextID( _traits->sharedContext->getState()->getContextID() );
       GraphicsWindow::incrementContextIDUsageCount( getState()->getContextID() );

@@ -1,7 +1,8 @@
 #include "app.hpp"
-#include "gui.h"
+#include "gui.hpp"
 #include "osgcanvas.hpp"
 
+#include <wx/xrc/xmlres.h>
 
 #include <osgDB/ReadFile>
 #include <osgViewer/ViewerEventHandlers>
@@ -14,8 +15,13 @@ IMPLEMENT_APP(App)
 
 bool App::OnInit()
 {
-  GUI *gui=new GUI();
+  wxXmlResource::Get()->InitAllHandlers();
+  wxXmlResource::Get()->Load("gui.xrc");
+  Gui* gui=new Gui();
+  wxXmlResource::Get()->LoadFrame(gui, NULL, "MainWindow");
+  gui->InitAfterXRC();
 
+  
   int attributes[7];
   attributes[0] = int(WX_GL_DOUBLEBUFFER);
   attributes[1] = WX_GL_RGBA;
@@ -25,11 +31,11 @@ bool App::OnInit()
   attributes[5] = 8;
   attributes[6] = 0;
   
-  osgCanvas* canvas=new osgCanvas(gui, wxID_ANY, wxDefaultPosition, wxSize(1024, 768), wxSUNKEN_BORDER, wxT("osgviewerWX"), attributes);
+  osgCanvas* canvas=new osgCanvas(gui, wxID_ANY, attributes, wxDefaultPosition, wxSize(800, 600), wxSUNKEN_BORDER, wxT("osgviewerWX"));
 
   osgViewer::Viewer* viewer=new osgViewer::Viewer;
   viewer->getCamera()->setGraphicsContext(canvas);
-  viewer->getCamera()->setViewport(0,0,1024,768);
+  viewer->getCamera()->setViewport(0,0,800,600);
   viewer->addEventHandler(new osgViewer::StatsHandler);
   viewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
 
@@ -48,6 +54,7 @@ bool App::OnInit()
       gui->Scenes.push_back(Scene(modelA, modelB));
     }
 	
+  viewer->setSceneData(gui->Scenes[0].GroupNode);
   viewer->setSceneData(gui->Scenes[0].GroupNode);
   gui->CurrentScene=&(gui->Scenes[0]);
   viewer->setCameraManipulator(new osgGA::TrackballManipulator);

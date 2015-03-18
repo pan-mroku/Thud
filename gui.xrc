@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
+  <object class="wxFrame" name="MainWindow" subclass="Gui">
+    <style>wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL</style>
+    <size>1024,768</size>
+    <title></title>
+    <centered>1</centered>
+    <object class="wxGridSizer">
+      <rows>1</rows>
+      <cols>2</cols>
+      <vgap>0</vgap>
+      <hgap>0</hgap>
+      <object class="sizeritem">
+	<option>2</option>
+	<flag>wxALIGN_LEFT|wxALIGN_TOP|wxALL|wxEXPAND|wxFIXED_MINSIZE</flag>
+	<border>5</border>
+	<object class="unknown" name="osgViewer" />
+      </object>
+      <object class="sizeritem">
+	<option>1</option>
+	<flag>wxEXPAND</flag>
+	<border>5</border>
+	<object class="wxBoxSizer">
+	  <orient>wxVERTICAL</orient>
+	  <object class="sizeritem">
+	    <option>0</option>
+	    <flag>wxEXPAND</flag>
+	    <border>5</border>
+	    <object class="wxBoxSizer">
+	      <orient>wxHORIZONTAL</orient>
+	      <object class="sizeritem">
+		<option>0</option>
+		<flag>wxALL</flag>
+		<border>5</border>
+		<object class="wxCheckBox" name="m_checkBox3">
+		  <label>Check Me!</label>
+		  <checked>0</checked>
+		</object>
+	      </object>
+	      <object class="spacer">
+		<option>1</option>
+		<flag>wxEXPAND</flag>
+		<border>5</border>
+		<size>0,0</size>
+	      </object>
+	      <object class="sizeritem">
+		<option>0</option>
+		<flag>wxALL</flag>
+		<border>5</border>
+		<object class="wxCheckBox" name="m_checkBox4">
+		  <label>Check Me!</label>
+		  <checked>0</checked>
+		</object>
+	      </object>
+	    </object>
+	  </object>
+	  <object class="sizeritem">
+	    <option>1</option>
+	    <flag>wxALIGN_CENTER|wxALL|wxEXPAND</flag>
+	    <border>5</border>
+	    <object class="wxButton" name="ButtonQuit">
+	      <label>MyButton</label>
+	      <default>0</default>
+	    </object>
+	  </object>
+	</object>
+      </object>
+    </object>
+  </object>
+</resource>

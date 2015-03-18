@@ -1,32 +1,38 @@
-#include "gui.h"
+#include "gui.hpp"
+
+#include <wx/xrc/xmlres.h>
 #include <iostream>
 
-GUI::GUI( wxWindow* parent ):
-  MainWindow( parent )
+Gui::Gui()
 {
-  Bind(wxEVT_IDLE, &GUI::OnIdle, this);
+  Bind(wxEVT_IDLE, &Gui::OnIdle, this);
   Timer.reset();
 }
 
-void GUI::m_button1OnButtonClick( wxCommandEvent& event )
+void Gui::InitAfterXRC()
+{
+  FindWindow("ButtonQuit")->Bind(wxEVT_BUTTON, &Gui::onQuitButton, this);
+}
+
+void Gui::onQuitButton(wxCommandEvent& event)
 {
   Close(true);
 }
 
-void GUI::SetViewer(osgViewer::Viewer *viewer)
+void Gui::SetViewer(osgViewer::Viewer *viewer)
 {
   osgViewer = viewer;
 }
 
-void GUI::OnIdle(wxIdleEvent &event)
+void Gui::OnIdle(wxIdleEvent &event)
 {
-    if (!osgViewer->isRealized())
-        return;
+  if (!osgViewer->isRealized())
+    return;
 
-    physicsEngine.Tick(*CurrentScene, Timer.elapsedTime_m());
-    Timer.reset();
+  physicsEngine.Tick(*CurrentScene, Timer.elapsedTime_m());
+  Timer.reset();
 
-    osgViewer->frame();
+  osgViewer->frame();
     
-    event.RequestMore();
+  event.RequestMore();
 }
