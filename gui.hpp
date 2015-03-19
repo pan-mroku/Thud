@@ -24,6 +24,7 @@ protected:
   
   osg::ref_ptr<osgViewer::Viewer> osgViewer;
   Physics physicsEngine;
+  bool asd=true;
 };
 
 #endif

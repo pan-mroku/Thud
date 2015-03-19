@@ -1,10 +1,11 @@
 #include "physics.hpp"
-#include "opttritri.hpp"
+#include "opttritri.hpp" //NoDivTriTriIsect
 
 #include <iostream>
 
 #include <osg/Geode>
 #include <osg/Geometry>
+#include <osg/io_utils> //cout<<mat
 
 Physics::Physics():
   ActiveAlgorithm(COLLISION_ALGORITHM_TRIANGLE)
@@ -40,42 +41,70 @@ bool Physics::CheckCollision(const Scene& scene)
 
 bool Physics::TriangleCollisionAlgorithm(const Scene& scene)
 {
+  const osg::Vec3Array* vertexArrayA=scene.ObjectA.GetVertexArray();
+  const osg::Vec3Array* vertexArrayB=scene.ObjectB.GetVertexArray();
+  
+  osg::Geometry::DrawElementsList drawElementsA=scene.ObjectA.GetElementsList();
+  osg::Geometry::DrawElementsList drawElementsB=scene.ObjectB.GetElementsList();
 
-//std::cout<<scene.ObjectA.Model->asGroup()->getChild(0)->asGeode()->getDrawableList()[0]->asGeometry()->getVertexArray()->getNumElements()<<std::endl;
-std::cout<<scene.ObjectA.Model->asGroup()->getChild(0)->asGeode()->getDrawableList()[0]->asGeometry()->getNumPrimitiveSets()<<std::endl;
-  /*
-  //Position
-  Ogre::Vector3 positionA=objectA.Node->_getDerivedPosition();
-  Ogre::Vector3 positionB=objectB.Node->_getDerivedPosition();
-  //Orientation
-  Ogre::Quaternion orientationA=objectA.Node->_getDerivedOrientation();
-  Ogre::Quaternion orientationB=objectB.Node->_getDerivedOrientation();
-  //FullTransform
-  Ogre::Matrix4 transformA=objectA.Node->_getFullTransform();
-  Ogre::Matrix4 transformB=objectB.Node->_getFullTransform();
-  //trzyprzej¶ciowe pêtle bardzo wszystko spowalnia³y, wiêc trzeba sobie radziæ inaczej
-  Ogre::Vector3 a0,a1,a2, b0,b1,b2;
-  //dla ka¿dego trójk±ta A
-  for(int faceIndexA=0;faceIndexA<objectA.IndicesBuffer.size()/3;faceIndexA++)
-  {
-  //trójk±t A
-  a0=transformA*objectA.VerticesBuffer[objectA.IndicesBuffer[3*faceIndexA]];
-  //std::cout<<a0<<" "<<objectA.VerticesBuffer[objectA.IndicesBuffer[3*faceIndexA]]<<" "<<positionA<<std::endl;
-  a1=transformA*objectA.VerticesBuffer[objectA.IndicesBuffer[3*faceIndexA+1]];
-  a2=transformA*objectA.VerticesBuffer[objectA.IndicesBuffer[3*faceIndexA+2]];
-  //sprawdzamy ka¿dy trójk±t B
-  for(int faceIndexB=0;faceIndexB<objectB.IndicesBuffer.size()/3;faceIndexB++)
-  {
-  //trójk±t B
-  b0=transformB*objectB.VerticesBuffer[objectB.IndicesBuffer[3*faceIndexB]];
-  b1=transformB*objectB.VerticesBuffer[objectB.IndicesBuffer[3*faceIndexB+1]];
-  b2=transformB*objectB.VerticesBuffer[objectB.IndicesBuffer[3*faceIndexB+2]];
-  //if(Moller(a0, a1, a2, b0, b1, b2))
-  if(NoDivTriTriIsect(&a0.x,&a1.x,&a2.x,&b0.x,&b1.x,&b2.x))
-  return true;
-}
-}
-  */
+  osg::NodeVisitor nodeVisitor;
+  scene.GroupNode->accept(nodeVisitor);
+  osg::Matrix transformA, transformB;
+  scene.ObjectA.PAT->computeLocalToWorldMatrix(transformA, &nodeVisitor);
+  scene.ObjectB.PAT->computeLocalToWorldMatrix(transformB, &nodeVisitor);
+
+  //trzyprzejÅ›ciowe pÄ™tle z wektorem bardzo wszystko spowalniaÅ‚y, wiÄ™c trzeba sobie radziÄ‡ inaczej
+  osg::Vec3d a0,a1,a2, b0,b1,b2;
+  
+  //int i=0;
+  for(int i=0; i<drawElementsA.size(); i++)
+    {
+      switch(drawElementsA[i]->getMode())
+        {
+        case osg::PrimitiveSet::TRIANGLES:
+          {
+            for(int j=0; j<drawElementsA[i]->getNumIndices()-3; j+=3)
+              {
+                a0=transformA*vertexArrayA->at(drawElementsA[i]->index(j));
+                a1=transformA*vertexArrayA->at(drawElementsA[i]->index(j+1));
+                a2=transformA*vertexArrayA->at(drawElementsA[i]->index(j+2));
+                //a teraz B
+              }
+            break;
+          }
+        case osg::PrimitiveSet::TRIANGLE_STRIP:
+          {
+            for(int j=0; j<drawElementsA[i]->getNumIndices(); j++)
+              std::cout<<vertexArrayA->at(drawElementsA[i]->index(j))<<std::endl;
+            std::cout<<std::endl;
+            break;
+          }
+        default:
+          std::cerr<<"Wrong  element mode"<<std::endl;
+        }
+      
+    }
+
+  /*  const osg::Vec3Array* vertexArrayB=scene.ObjectB.GetVertexArray();
+
+
+  
+
+  for(int vertexIndexA=0; vertexIndexA<vertexArrayA->size(); vertexIndexA++)
+    {
+      a0=transformA*vertexArrayA->at(vertexIndexA)[0];
+      a1=transformA*vertexArrayA->at(vertexIndexA)[1];
+      a2=transformA*vertexArrayA->at(vertexIndexA)[2];
+      for(int vertexIndexB=0; vertexIndexB<vertexArrayB->size(); vertexIndexB++)
+        {
+          b0=transformB*vertexArrayB->at(vertexIndexB)[0];
+          b1=transformB*vertexArrayB->at(vertexIndexB)[1];
+          b1=transformB*vertexArrayB->at(vertexIndexB)[2];
+          if(NoDivTriTriIsect(&a0.x,&a1.x,&a2.x,&b0.x,&b1.x,&b2.x))
+            return true;
+        }
+        }*/
+  
   return false;
 }
 
