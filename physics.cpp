@@ -74,9 +74,15 @@ bool Physics::TriangleCollisionAlgorithm(const Scene& scene)
           }
         case osg::PrimitiveSet::TRIANGLE_STRIP:
           {
-            for(int j=0; j<drawElementsA[i]->getNumIndices(); j++)
-              std::cout<<vertexArrayA->at(drawElementsA[i]->index(j))<<std::endl;
-            std::cout<<std::endl;
+            a0=transformA*vertexArrayA->at(drawElementsA[i]->index(0));
+            a1=transformA*vertexArrayA->at(drawElementsA[i]->index(1));
+            for(int j=2; j<drawElementsA[i]->getNumIndices(); j++)
+              {
+                a2=transformA*vertexArrayA->at(drawElementsA[i]->index(j));
+                //B i test
+                a0=a1;
+                a1=a2;
+              }
             break;
           }
         default:
