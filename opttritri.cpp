@@ -7,8 +7,8 @@
  * Updated June 1999: removed the divisions -- a little faster now!
  * Updated October 1999: added {} to CROSS and SUB macros 
  *
- * int NoDivTriTriIsect(float V0[3],float V1[3],float V2[3],
- *                      float U0[3],float U1[3],float U2[3])
+ * int NoDivTriTriIsect(double V0[3],double V1[3],double V2[3],
+ *                      double U0[3],double U1[3],double U2[3])
  *
  * parameters: vertices of triangle 1: V0,V1,V2
  *             vertices of triangle 2: U0,U1,U2
@@ -16,8 +16,9 @@
  *
  */
 
+#include<iostream>
 #include <math.h>
-#define FABS(x) (float(fabs(x)))        /* implement as is fastest on your machine */
+#define FABS(x) (double(fabs(x)))        /* implement as is fastest on your machine */
 
 /* if USE_EPSILON_TEST is true then we do a check:
          if |dv|<EPSILON then dv=0.0;
@@ -44,7 +45,7 @@
 #define SORT(a,b)       \
              if(a>b)    \
              {          \
-               float c; \
+               double c; \
                c=a;     \
                a=b;     \
                b=c;     \
@@ -76,7 +77,7 @@
 
 #define EDGE_AGAINST_TRI_EDGES(V0,V1,U0,U1,U2) \
 {                                              \
-  float Ax,Ay,Bx,By,Cx,Cy,e,d,f;               \
+  double Ax,Ay,Bx,By,Cx,Cy,e,d,f;               \
   Ax=V1[i0]-V0[i0];                            \
   Ay=V1[i1]-V0[i1];                            \
   /* test edge U0,U1 against V0,V1 */          \
@@ -89,7 +90,7 @@
 
 #define POINT_IN_TRI(V0,U0,U1,U2)           \
 {                                           \
-  float a,b,c,d0,d1,d2;                     \
+  double a,b,c,d0,d1,d2;                     \
   /* is T1 completly inside T2? */          \
   /* check if V0 is inside tri(U0,U1,U2) */ \
   a=U1[i1]-U0[i1];                          \
@@ -112,10 +113,10 @@
   }                                         \
 }
 
-int coplanar_tri_tri(float N[3],float V0[3],float V1[3],float V2[3],
-                     float U0[3],float U1[3],float U2[3])
+int coplanar_tri_tri(double N[3],double V0[3],double V1[3],double V2[3],
+                     double U0[3],double U1[3],double U2[3])
 {
-   float A[3];
+   double A[3];
    short i0,i1;
    /* first project onto an axis-aligned plane, that maximizes the area */
    /* of the triangles, compute indices: i0,i1. */
@@ -198,19 +199,19 @@ int coplanar_tri_tri(float N[3],float V0[3],float V1[3],float V2[3],
 
 
 
-int NoDivTriTriIsect(float V0[3],float V1[3],float V2[3],
-                     float U0[3],float U1[3],float U2[3])
+int NoDivTriTriIsect(double V0[3],double V1[3],double V2[3],
+                     double U0[3],double U1[3],double U2[3])
 {
-  float E1[3],E2[3];
-  float N1[3],N2[3],d1,d2;
-  float du0,du1,du2,dv0,dv1,dv2;
-  float D[3];
-  float isect1[2], isect2[2];
-  float du0du1,du0du2,dv0dv1,dv0dv2;
+  double E1[3],E2[3];
+  double N1[3],N2[3],d1,d2;
+  double du0,du1,du2,dv0,dv1,dv2;
+  double D[3];
+  double isect1[2], isect2[2];
+  double du0du1,du0du2,dv0dv1,dv0dv2;
   short index;
-  float vp0,vp1,vp2;
-  float up0,up1,up2;
-  float bb,cc,max;
+  double vp0,vp1,vp2;
+  double up0,up1,up2;
+  double bb,cc,max;
 
   /* compute plane equation of triangle(V0,V1,V2) */
   SUB(E1,V1,V0);
@@ -264,10 +265,10 @@ int NoDivTriTriIsect(float V0[3],float V1[3],float V2[3],
   CROSS(D,N1,N2);
 
   /* compute and index to the largest component of D */
-  max=(float)FABS(D[0]);
+  max=(double)FABS(D[0]);
   index=0;
-  bb=(float)FABS(D[1]);
-  cc=(float)FABS(D[2]);
+  bb=(double)FABS(D[1]);
+  cc=(double)FABS(D[2]);
   if(bb>max) max=bb,index=1;
   if(cc>max) max=cc,index=2;
 
@@ -281,14 +282,14 @@ int NoDivTriTriIsect(float V0[3],float V1[3],float V2[3],
   up2=U2[index];
 
   /* compute interval for triangle 1 */
-  float a,b,c,x0,x1;
+  double a,b,c,x0,x1;
   NEWCOMPUTE_INTERVALS(vp0,vp1,vp2,dv0,dv1,dv2,dv0dv1,dv0dv2,a,b,c,x0,x1);
 
   /* compute interval for triangle 2 */
-  float d,e,f,y0,y1;
+  double d,e,f,y0,y1;
   NEWCOMPUTE_INTERVALS(up0,up1,up2,du0,du1,du2,du0du1,du0du2,d,e,f,y0,y1);
 
-  float xx,yy,xxyy,tmp;
+  double xx,yy,xxyy,tmp;
   xx=x0*x1;
   yy=y0*y1;
   xxyy=xx*yy;
@@ -305,5 +306,6 @@ int NoDivTriTriIsect(float V0[3],float V1[3],float V2[3],
   SORT(isect2[0],isect2[1]);
 
   if(isect1[1]<isect2[0] || isect2[1]<isect1[0]) return 0;
+  //  printf("(%g, %g, %g) (%g, %g, %g) (%g, %g, %g) (%g, %g, %g) (%g, %g, %g) (%g, %g, %g) \n", V0[0], V0[1], V0[2], V1[0], V1[1], V1[2], V2[0], V2[1], V2[2], U0[0], U0[1], U0[2], U1[0], U1[1], U1[2], U2[0], U2[1], U2[2]);
   return 1;
 }

@@ -16,6 +16,7 @@ osgCanvas::osgCanvas(wxWindow *parent, wxWindowID id, int *attributes, const wxP
   wxGLCanvas::Bind(wxEVT_CHAR, &osgCanvas::OnKeyDown, this);
   wxGLCanvas::Bind(wxEVT_KEY_UP, &osgCanvas::OnKeyUp, this);
   wxGLCanvas::Bind(wxEVT_MOUSEWHEEL, &osgCanvas::OnMouseWheel, this);
+  parent->Bind(wxEVT_SIZE, &osgCanvas::OnSize, this);
 
   _traits = new GraphicsContext::Traits;
 
@@ -74,6 +75,15 @@ void osgCanvas::OnMouseWheel(wxMouseEvent& event)
     GraphicsWindow::getEventQueue()->mouseScroll(osgGA::GUIEventAdapter::SCROLL_UP);
   else
     GraphicsWindow::getEventQueue()->mouseScroll(osgGA::GUIEventAdapter::SCROLL_DOWN);
+}
+
+void osgCanvas::OnSize(wxSizeEvent& event)
+{
+  _traits->width = wxWindow::GetParent()->GetClientSize().x;
+  _traits->height = wxWindow::GetParent()->GetClientSize().y;
+  wxGLCanvas::SetSize(wxWindow::GetParent()->GetClientSize());
+  GraphicsContext::_cameras.front()->setViewport(0, 0, _traits->width, _traits->height);
+  wxWindow::Refresh();
 }
 
 void osgCanvas::OnKeyDown(wxKeyEvent& event)

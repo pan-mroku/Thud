@@ -20,7 +20,6 @@ bool App::OnInit()
   Gui* gui=new Gui();
   wxXmlResource::Get()->LoadFrame(gui, NULL, "MainWindow");
   gui->InitAfterXRC();
-
   
   int attributes[7];
   attributes[0] = int(WX_GL_DOUBLEBUFFER);
@@ -31,7 +30,7 @@ bool App::OnInit()
   attributes[5] = 8;
   attributes[6] = 0;
   
-  osgCanvas* canvas=new osgCanvas(gui, wxID_ANY, attributes, wxDefaultPosition, wxSize(800, 600), wxSUNKEN_BORDER, wxT("osgviewerWX"));
+  osgCanvas* canvas=new osgCanvas(gui->GetViewerWindow(), wxID_ANY, attributes, wxDefaultPosition, wxSize(800, 600), wxSUNKEN_BORDER, wxT("osgviewerWX"));
 
   osgViewer::Viewer* viewer=new osgViewer::Viewer;
   viewer->getCamera()->setGraphicsContext(canvas);
@@ -48,11 +47,11 @@ bool App::OnInit()
   tinyxml2::XMLNode*  configRoot = configDocument.RootElement();
   tinyxml2::XMLElement* sceneElement = configRoot->FirstChildElement("scene");
   for(tinyxml2::XMLElement* sceneElement = configRoot->FirstChildElement("scene"); sceneElement!=NULL; sceneElement=sceneElement->NextSiblingElement())
-    {
-      std::string modelA=sceneElement->Attribute("objecta");
-      std::string modelB=sceneElement->Attribute("objectb");
-      gui->Scenes.push_back(Scene(modelA, modelB));
-    }
+  {
+    std::string modelA=sceneElement->Attribute("objecta");
+    std::string modelB=sceneElement->Attribute("objectb");
+    gui->Scenes.push_back(Scene(modelA, modelB));
+  }
 	
   viewer->setSceneData(gui->Scenes[0].GroupNode);
   viewer->setSceneData(gui->Scenes[0].GroupNode);

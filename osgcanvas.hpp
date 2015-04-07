@@ -23,6 +23,7 @@ public:
   void OnMouseUp(wxMouseEvent &event);
   void OnMouseMotion(wxMouseEvent &event);
   void OnMouseWheel(wxMouseEvent& event);
+  void OnSize(wxSizeEvent& event);
   void OnKeyDown(wxKeyEvent& event);
   void OnKeyUp(wxKeyEvent& event);
 
