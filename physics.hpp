@@ -10,7 +10,7 @@ public:
 
   typedef enum
     {
-      COLLISION_ALGORITHM_NONE,
+      COLLISION_ALGORITHM_NONE=0,
       COLLISION_ALGORITHM_TRIANGLE,
       COLLISION_ALGORITHM_OPENCL
     } CollisionAlgorithmEnum;
