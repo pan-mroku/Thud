@@ -22,6 +22,7 @@ public:
   osg::ElapsedTime Timer;
   std::vector<Scene> Scenes;
   Scene* CurrentScene;
+	wxChoice* SceneChoice;
 protected:
   void onQuitButton(wxCommandEvent& event);
   

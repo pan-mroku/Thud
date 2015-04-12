@@ -1,133 +1,142 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
-  <object class="wxFrame" name="MainWindow" subclass="Gui">
-    <style>wxCAPTION|wxDEFAULT_FRAME_STYLE|wxMAXIMIZE_BOX|wxTAB_TRAVERSAL</style>
-    <pos>0,0</pos>
-    <size>1920,1080</size>
-    <title>Thud</title>
-    <centered>1</centered>
-    <object class="wxGridSizer">
-      <rows>1</rows>
-      <cols>1</cols>
-      <vgap>0</vgap>
-      <hgap>0</hgap>
-      <object class="sizeritem">
-	<option>0</option>
-	<flag>wxEXPAND</flag>
-	<border>5</border>
-	<object class="wxGridBagSizer">
-	  <vgap>0</vgap>
-	  <hgap>0</hgap>
-	  <growablecols>0</growablecols>
-	  <growablerows>1</growablerows>
-	  <object class="sizeritem">
-	    <cellpos>1,0</cellpos>
-	    <cellspan>1,1</cellspan>
-	    <flag>wxALIGN_LEFT|wxALL|wxEXPAND</flag>
-	    <border>0</border>
-	    <object class="wxPanel" name="osgViewer">
-	      <style>wxFULL_REPAINT_ON_RESIZE|wxWANTS_CHARS</style>
-	      <pos>-1,-1</pos>
-	      <size>800,600</size>
-	    </object>
-	  </object>
-	  <object class="sizeritem">
-	    <cellpos>1,1</cellpos>
-	    <cellspan>1,1</cellspan>
-	    <flag>wxEXPAND</flag>
-	    <border>5</border>
-	    <object class="wxBoxSizer">
-	      <minsize>0,0</minsize>
-	      <orient>wxVERTICAL</orient>
-	      <object class="sizeritem">
-		<option>0</option>
-		<flag>wxEXPAND</flag>
-		<border>5</border>
-		<object class="wxBoxSizer">
-		  <orient>wxHORIZONTAL</orient>
-		  <object class="sizeritem">
-		    <option>0</option>
-		    <flag>wxALL</flag>
-		    <border>5</border>
-		    <object class="wxCheckBox" name="m_checkBox3">
-		      <enabled>0</enabled>
-		      <label>Kolizja wykryta przez algorytm</label>
-		      <checked>0</checked>
-		    </object>
-		  </object>
-		  <object class="spacer">
-		    <option>1</option>
-		    <flag>wxEXPAND</flag>
-		    <border>5</border>
-		    <size>0,0</size>
-		  </object>
-		  <object class="sizeritem">
-		    <option>0</option>
-		    <flag>wxALL</flag>
-		    <border>5</border>
-		    <object class="wxCheckBox" name="m_checkBox4">
-		      <enabled>0</enabled>
-		      <label>Kolizja zapisana w scenie</label>
-		      <checked>0</checked>
-		    </object>
-		  </object>
+	<object class="wxFrame" name="MainWindow" subclass="Gui">
+		<style>wxCAPTION|wxDEFAULT_FRAME_STYLE|wxMAXIMIZE_BOX|wxTAB_TRAVERSAL</style>
+		<pos>0,0</pos>
+		<size>1920,1080</size>
+		<title>Thud</title>
+		<centered>1</centered>
+		<object class="wxGridSizer">
+			<rows>1</rows>
+			<cols>1</cols>
+			<vgap>0</vgap>
+			<hgap>0</hgap>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxGridBagSizer">
+					<vgap>0</vgap>
+					<hgap>0</hgap>
+					<growablecols>0</growablecols>
+					<growablerows>1</growablerows>
+					<object class="sizeritem">
+						<cellpos>1,0</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxALIGN_LEFT|wxALL|wxEXPAND</flag>
+						<border>0</border>
+						<object class="wxPanel" name="osgViewer">
+							<style>wxFULL_REPAINT_ON_RESIZE|wxWANTS_CHARS</style>
+							<pos>-1,-1</pos>
+							<size>800,600</size>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<cellpos>1,1</cellpos>
+						<cellspan>1,1</cellspan>
+						<flag>wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxBoxSizer">
+							<minsize>0,0</minsize>
+							<orient>wxVERTICAL</orient>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxEXPAND</flag>
+								<border>5</border>
+								<object class="wxBoxSizer">
+									<orient>wxHORIZONTAL</orient>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxCheckBox" name="m_checkBox3">
+											<enabled>0</enabled>
+											<label>Kolizja wykryta przez algorytm</label>
+											<checked>0</checked>
+										</object>
+									</object>
+									<object class="spacer">
+										<option>1</option>
+										<flag>wxEXPAND</flag>
+										<border>5</border>
+										<size>0,0</size>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxCheckBox" name="m_checkBox4">
+											<enabled>0</enabled>
+											<label>Kolizja zapisana w scenie</label>
+											<checked>0</checked>
+										</object>
+									</object>
+								</object>
+							</object>
+							<object class="spacer">
+								<option>1</option>
+								<flag>wxEXPAND</flag>
+								<border>5</border>
+								<size>0,0</size>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxBOTTOM|wxEXPAND</flag>
+								<border>5</border>
+								<object class="wxBoxSizer">
+									<orient>wxHORIZONTAL</orient>
+									<object class="spacer">
+										<option>1</option>
+										<flag>wxLEFT</flag>
+										<border>5</border>
+										<size>10,0</size>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALIGN_RIGHT</flag>
+										<border>5</border>
+										<object class="wxButton" name="ButtonQuit">
+											<style>wxBU_EXACTFIT</style>
+											<pos>0,0</pos>
+											<size>100,80</size>
+											<label>MyButton</label>
+											<default>0</default>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<cellpos>0,0</cellpos>
+						<cellspan>1,2</cellspan>
+						<flag>wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxBoxSizer">
+							<minsize>-1,10</minsize>
+							<orient>wxHORIZONTAL</orient>
+							<object class="sizeritem">
+								<option>1</option>
+								<flag>wxEXPAND</flag>
+								<border>5</border>
+								<object class="wxChoice" name="AlgorithmChoice">
+									<selection>0</selection>
+									<content />
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>1</option>
+								<flag>wxEXPAND</flag>
+								<border>5</border>
+								<object class="wxChoice" name="SceneChoice">
+									<selection>0</selection>
+									<content />
+								</object>
+							</object>
+						</object>
+					</object>
+				</object>
+			</object>
 		</object>
-	      </object>
-	      <object class="spacer">
-		<option>1</option>
-		<flag>wxEXPAND</flag>
-		<border>5</border>
-		<size>0,0</size>
-	      </object>
-	      <object class="sizeritem">
-		<option>0</option>
-		<flag>wxBOTTOM|wxEXPAND</flag>
-		<border>5</border>
-		<object class="wxBoxSizer">
-		  <orient>wxHORIZONTAL</orient>
-		  <object class="spacer">
-		    <option>1</option>
-		    <flag>wxLEFT</flag>
-		    <border>5</border>
-		    <size>10,0</size>
-		  </object>
-		  <object class="sizeritem">
-		    <option>0</option>
-		    <flag>wxALIGN_RIGHT</flag>
-		    <border>5</border>
-		    <object class="wxButton" name="ButtonQuit">
-		      <style>wxBU_EXACTFIT</style>
-		      <pos>0,0</pos>
-		      <size>100,80</size>
-		      <label>MyButton</label>
-		      <default>0</default>
-		    </object>
-		  </object>
-		</object>
-	      </object>
-	    </object>
-	  </object>
-	  <object class="sizeritem">
-	    <cellpos>0,0</cellpos>
-	    <cellspan>1,2</cellspan>
-	    <flag>wxEXPAND</flag>
-	    <border>5</border>
-	    <object class="wxBoxSizer">
-	      <minsize>-1,10</minsize>
-	      <orient>wxVERTICAL</orient>
-	      <object class="sizeritem">
-		<option>0</option>
-		<flag>wxEXPAND</flag>
-		<border>5</border>
-		<object class="wxChoice" name="AlgorithmChoice">
-		  <selection>0</selection>
-		  <content />
-		</object>
-	      </object>
-	    </object>
-	  </object>
 	</object>
-      </object>
-    </object>
-  </object>
 </resource>

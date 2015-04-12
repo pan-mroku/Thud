@@ -15,16 +15,26 @@ void Gui::InitAfterXRC()
 {
 	FindWindow("ButtonQuit")->Bind(wxEVT_BUTTON, &Gui::onQuitButton, this);
 	viewerWindow=(wxWindow*)FindWindow("osgViewer");
+
 	algorithmChoice=(wxChoice*)FindWindow("AlgorithmChoice");
 	algorithmChoice->Append("None");
 	algorithmChoice->Append("Triangle-triangle");
-		algorithmChoice->SetSelection(1);
+	algorithmChoice->SetSelection(1);
 	algorithmChoice->Append("OpenCL");
 	algorithmChoice->Bind(wxEVT_CHOICE,
 	                      [=](wxCommandEvent& event)
 	                      {
 		                      physicsEngine.ActiveAlgorithm = Physics::CollisionAlgorithmEnum(event.GetInt());
 	                      });
+
+	SceneChoice=(wxChoice*)FindWindow("SceneChoice");
+	SceneChoice->Bind(wxEVT_CHOICE,
+	                  [=](wxCommandEvent& event)
+	                  {
+		                  CurrentScene=&(Scenes[event.GetInt()]);
+		                  osgViewer->setSceneData(CurrentScene->GroupNode);
+	                  });
+	
 }
 
 void Gui::onQuitButton(wxCommandEvent& event)
@@ -51,7 +61,7 @@ void Gui::OnIdle(wxIdleEvent &event)
 {
 	if (!osgViewer->isRealized())
 		return;
-	//std::cerr<<physicsEngine.CheckCollision(*CurrentScene)<<std::endl;
+	std::cerr<<physicsEngine.CheckCollision(*CurrentScene)<<std::endl;
 	/*	osg::Vec3f asd[6];
 	asd[0]=osg::Vec3f(-1.23625, -0.864516, 0.908743);
 	asd[1]=osg::Vec3f(-1.33038, -0.918059, 0.938894);

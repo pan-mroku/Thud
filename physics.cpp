@@ -166,7 +166,9 @@ bool Physics::TriangleCollisionAlgorithm(const Scene& scene)
 			if(NoDivTriTriIsect(trianglerA.v0._v, trianglerA.v1._v, trianglerA.v2._v,
 													trianglerB.v0._v, trianglerB.v1._v, trianglerB.v2._v))
 			{
-				std::cerr<<trianglerA.elementIndex<<","<<trianglerB.elementIndex<<"!"<<"Polygon[{{"<<trianglerA.v0<<"},{"<<trianglerA.v1<<"},{"<<trianglerA.v2<<"}},{{"<<trianglerB.v0<<"},{"<<trianglerB.v1<<"},{"<<trianglerB.v2<<"}}]"<<std::endl;
+				std::cerr<<trianglerA.elementIndex<<","<<trianglerB.elementIndex<<" ! ("<<
+					trianglerA.v0<<", "<<trianglerA.v1<<", "<<trianglerA.v2<<") ("<<
+					trianglerB.v0<<", "<<trianglerB.v1<<", "<<trianglerB.v2<<")"<<std::endl;
 				return true;
 			}
 	

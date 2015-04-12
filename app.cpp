@@ -51,11 +51,12 @@ bool App::OnInit()
     std::string modelA=sceneElement->Attribute("objecta");
     std::string modelB=sceneElement->Attribute("objectb");
     gui->Scenes.push_back(Scene(modelA, modelB));
+    gui->SceneChoice->Append(sceneElement->Attribute("title"));
   }
 	
   viewer->setSceneData(gui->Scenes[0].GroupNode);
-  viewer->setSceneData(gui->Scenes[0].GroupNode);
   gui->CurrentScene=&(gui->Scenes[0]);
+  gui->SceneChoice->SetSelection(0);
   viewer->setCameraManipulator(new osgGA::TrackballManipulator);
 
   gui->SetViewer(viewer);
