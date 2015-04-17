@@ -1,3 +1,4 @@
+
 #include "physics.hpp"
 #include "opttritri.hpp" //NoDivTriTriIsect
 
@@ -16,8 +17,6 @@ OSGTriangler::OSGTriangler(const Object& object):
 {
 	vertexArray=object.GetVertexArray();
 	drawElements=object.GetElementsList();
-	/*	osg::NodeVisitor nodeVisitor;
-			object.PAT->accept(nodeVisitor);*/
 	transform.set(object.PAT->getWorldMatrices(object.Model)[0]);
 	GetNextTriangle();
 }
@@ -48,9 +47,9 @@ bool OSGTriangler::GetNextTriangle()
 			else
 				triangleIndex+=3;
 
-			v0=transform*vertexArray->at(drawElements[elementIndex]->index(triangleIndex));
-			v1=transform*vertexArray->at(drawElements[elementIndex]->index(triangleIndex+1));
-			v2=transform*vertexArray->at(drawElements[elementIndex]->index(triangleIndex+2));
+			v0=vertexArray->at(drawElements[elementIndex]->index(triangleIndex))*transform;
+			v1=vertexArray->at(drawElements[elementIndex]->index(triangleIndex+1))*transform;
+			v2=vertexArray->at(drawElements[elementIndex]->index(triangleIndex+2))*transform;
 
 			AnyTrianglesLeft=true;
 				
@@ -76,9 +75,9 @@ bool OSGTriangler::GetNextTriangle()
 
 			if(triangleIndex<0)
 			{
-				v0=transform*vertexArray->at(drawElements[elementIndex]->index(0));
-				v1=transform*vertexArray->at(drawElements[elementIndex]->index(1));
-				v2=transform*vertexArray->at(drawElements[elementIndex]->index(2));
+				v0=vertexArray->at(drawElements[elementIndex]->index(0))*transform;
+				v1=vertexArray->at(drawElements[elementIndex]->index(1))*transform;
+				v2=vertexArray->at(drawElements[elementIndex]->index(2))*transform;
 				triangleIndex=3;
 			}
 			else
@@ -86,7 +85,7 @@ bool OSGTriangler::GetNextTriangle()
 				v0=v1;
 				v1=v2;
 				++triangleIndex;
-				v2=transform*vertexArray->at(drawElements[elementIndex]->index(triangleIndex));
+				v2=vertexArray->at(drawElements[elementIndex]->index(triangleIndex))*transform;
 			}
 			AnyTrianglesLeft=true;
 			return true;
@@ -165,13 +164,7 @@ bool Physics::TriangleCollisionAlgorithm(const Scene& scene)
 		for(OSGTriangler trianglerB(scene.ObjectB); trianglerB.AnyTrianglesLeft; trianglerB.GetNextTriangle())
 			if(NoDivTriTriIsect(trianglerA.v0._v, trianglerA.v1._v, trianglerA.v2._v,
 													trianglerB.v0._v, trianglerB.v1._v, trianglerB.v2._v))
-			{
-				std::cerr<<trianglerA.elementIndex<<","<<trianglerB.elementIndex<<" ! ("<<
-					trianglerA.v0<<", "<<trianglerA.v1<<", "<<trianglerA.v2<<") ("<<
-					trianglerB.v0<<", "<<trianglerB.v1<<", "<<trianglerB.v2<<")"<<std::endl;
 				return true;
-			}
-	
 	return false;
 }
 

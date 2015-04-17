@@ -165,16 +165,16 @@
                             <property name="flag">wxEXPAND</property>
                             <property name="row">1</property>
                             <property name="rowspan">1</property>
-                            <object class="wxBoxSizer" expanded="0">
+                            <object class="wxBoxSizer" expanded="1">
                                 <property name="minimum_size">0,0</property>
                                 <property name="name">PanelSizer</property>
                                 <property name="orient">wxVERTICAL</property>
                                 <property name="permission">none</property>
-                                <object class="sizeritem" expanded="0">
+                                <object class="sizeritem" expanded="1">
                                     <property name="border">5</property>
                                     <property name="flag">wxEXPAND</property>
                                     <property name="proportion">0</property>
-                                    <object class="wxBoxSizer" expanded="0">
+                                    <object class="wxBoxSizer" expanded="1">
                                         <property name="minimum_size"></property>
                                         <property name="name">bSizer2</property>
                                         <property name="orient">wxHORIZONTAL</property>
@@ -196,7 +196,7 @@
                                                 <property name="label">Kolizja wykryta przez algorytm</property>
                                                 <property name="maximum_size"></property>
                                                 <property name="minimum_size"></property>
-                                                <property name="name">m_checkBox3</property>
+                                                <property name="name">AlgorithmCheckBox</property>
                                                 <property name="permission">protected</property>
                                                 <property name="pos"></property>
                                                 <property name="size"></property>
@@ -263,7 +263,7 @@
                                                 <property name="label">Kolizja zapisana w scenie</property>
                                                 <property name="maximum_size"></property>
                                                 <property name="minimum_size"></property>
-                                                <property name="name">m_checkBox4</property>
+                                                <property name="name">SceneCheckBox</property>
                                                 <property name="permission">protected</property>
                                                 <property name="pos"></property>
                                                 <property name="size"></property>
