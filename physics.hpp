@@ -22,6 +22,8 @@ public:
   bool TriangleCollisionAlgorithm(const Scene& scene);
   bool OpenCLCollisionAlgorithm(const Scene& scene);
 
+	bool CheckSceneCollision(const Scene& scene);
+
 protected:
 private:
 };

@@ -50,6 +50,7 @@
 										<flag>wxALL</flag>
 										<border>5</border>
 										<object class="wxCheckBox" name="AlgorithmCheckBox">
+											<style>wxALIGN_RIGHT</style>
 											<enabled>0</enabled>
 											<label>Kolizja wykryta przez algorytm</label>
 											<checked>0</checked>

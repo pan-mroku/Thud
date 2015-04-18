@@ -11,6 +11,8 @@
 
 #include <tinyxml2.h>
 
+#include <cstdlib> //strtod
+
 IMPLEMENT_APP(App)
 
 bool App::OnInit()
@@ -50,7 +52,8 @@ bool App::OnInit()
   {
     std::string modelA=sceneElement->Attribute("objecta");
     std::string modelB=sceneElement->Attribute("objectb");
-    gui->Scenes.push_back(Scene(modelA, modelB));
+    double squaredDistanceWhenCollision=std::strtod(sceneElement->Attribute("squared_distance"), NULL);
+    gui->Scenes.push_back(Scene(modelA, modelB, squaredDistanceWhenCollision));
     gui->SceneChoice->Append(sceneElement->Attribute("title"));
   }
 	

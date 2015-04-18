@@ -1,8 +1,9 @@
 #include "scene.hpp"
 
-Scene::Scene(const std::string& ModelA, const std::string& ModelB):
+Scene::Scene(const std::string& ModelA, const std::string& ModelB, const double& squaredDistanceWhenCollision):
   ObjectA(ModelA),
-  ObjectB(ModelB)
+  ObjectB(ModelB),
+  SquaredDistanceWhenCollision(squaredDistanceWhenCollision)
 {
   ObjectA.PAT->setPosition(osg::Vec3(2,0,0));
   ObjectA.MoveVector.x()=-0.5;

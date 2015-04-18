@@ -172,3 +172,9 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 {
 	return false;
 }
+
+bool Physics::CheckSceneCollision(const Scene& scene)
+{
+	auto squaredDistanceVector = scene.ObjectA.PAT->getPosition() - scene.ObjectB.PAT->getPosition();
+	return (squaredDistanceVector.length2()-scene.SquaredDistanceWhenCollision)<0.1;
+}

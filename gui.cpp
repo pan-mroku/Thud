@@ -63,6 +63,7 @@ void Gui::OnIdle(wxIdleEvent &event)
 	if (!osgViewer->isRealized())
 		return;
 	((wxCheckBox*)FindWindow("AlgorithmCheckBox"))->SetValue(physicsEngine.CheckCollision(*CurrentScene));
+	((wxCheckBox*)FindWindow("SceneCheckBox"))->SetValue(physicsEngine.CheckSceneCollision(*CurrentScene));
 	physicsEngine.Tick(*CurrentScene, Timer.elapsedTime_m());
 	Timer.reset();
 
