@@ -8,6 +8,8 @@
 #include <osg/Geometry>
 #include <osg/io_utils> //cout<<mat
 
+#include <CL/cl.hpp>
+
 //----------------------------------------------------------------------
 
 OSGTriangler::OSGTriangler(const Object& object):
@@ -170,6 +172,17 @@ bool Physics::TriangleCollisionAlgorithm(const Scene& scene)
 
 bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 {
+	std::vector<cl::Platform> platforms;
+	cl::Platform::get(&platforms);
+	std::vector<cl::Device> devices;
+	platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
+	/*	std::string out;
+		devices[0].getInfo(CL_DEVICE_NAME, &out);
+	std::cerr<<out<<std::endl;*/ //combobox?
+	std::vector<size_t> out;
+	devices[0].getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &out);
+	for(auto o: out)
+		std::cerr<<o<<std::endl;
 	return false;
 }
 
