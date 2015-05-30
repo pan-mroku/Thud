@@ -23,10 +23,6 @@ void Physics::CreateContext(osgCanvas& canvas)
 	int err=CL_SUCCESS;
 	context = cl::Context(devices, NULL, NULL, NULL, &err);
 
-	std::string extensions;
-	devices[0].getInfo(CL_DEVICE_EXTENSIONS, &extensions);
-	std::cerr<<extensions<<" err: "<<err<<" devices: "<<devices.size()<<std::endl;
-
 	//https://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/global.html
 	kernelCode=
 		"void kernel translate(global const float* vA, global const int* iA, global float* C){"
@@ -42,6 +38,15 @@ void Physics::CreateContext(osgCanvas& canvas)
       exit(1);
     }
 
+  kernel = cl::Kernel(program, "translate");
+
+	std::string extensions="";
+	size_t computeUnits=0;
+	devices[0].getInfo(CL_DEVICE_EXTENSIONS, &extensions);
+	devices[0].getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &computeUnits);
+	kernel.getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &maxWorkGroup);
+	std::cerr<<"ext: "<<extensions<<std::endl<<"max units: "<<computeUnits<<" max work group: "<<maxWorkGroup<<" err: "<<err<<" devices: "<<devices.size()<<std::endl;
+  
 	//platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
 	/*	std::string out;
 		devices[0].getInfo(CL_DEVICE_NAME, &out);
@@ -119,38 +124,36 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 		indicesA.push_back(trianglerA.index+1);
 		indicesA.push_back(trianglerA.index+2);
 	}
-		//https://developer.apple.com/library/mac/documentation/Performance/Conceptual/OpenCL_MacProgGuide/CreatingandManagingBufferObjectsInOpenCL/CreatingandManagingBufferObjectsInOpenCL.html
-	//http://stackoverflow.com/questions/9565253/benchmark-of-cl-mem-use-host-ptr-and-cl-mem-copy-host-ptr-in-opencl
+
 	cl_int err;
-
-	cl::Buffer vertexBufferA(context,	CL_MEM_USE_HOST_PTR, (GLuint)scene.ObjectA.GetVertexArray()->getNumElements(), (void*)scene.ObjectA.GetVertexArray()->getDataPointer(), &err);
+	//http://stackoverflow.com/questions/9565253/benchmark-of-cl-mem-use-host-ptr-and-cl-mem-copy-host-ptr-in-opencl
+	//http://www.cs.virginia.edu/~mwb7w/cuda_support/pinned_tradeoff.html
+	cl::Buffer vertexBufferA(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, (GLuint)sizeof(float)*scene.ObjectA.GetVertexArray()->getNumElements(), (void*)scene.ObjectA.GetVertexArray()->getDataPointer(), &err);
 	if(err)
 		std::cerr<<err<<std::endl;			
-	cl::Buffer indexBufferA(context,	CL_MEM_USE_HOST_PTR, (GLuint)indicesA.size(), indicesA.data(), &err);
+	cl::Buffer indexBufferA(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, (GLuint)sizeof(int)*indicesA.size(), indicesA.data(), &err);
 	if(err)
 		std::cerr<<err<<std::endl;			
-	//cl::Buffer bufferB(context,	CL_MEM_READ_ONLY, (GLuint)1, nullptr, &err);
-
-
-	 cl::Buffer buffer_C(context,CL_MEM_READ_WRITE,sizeof(int)*10);
 	
-	//create queue to which we will push commands for the device.
+	cl::Buffer buffer_C(context,CL_MEM_WRITE_ONLY, sizeof(float)*indicesA.size()/3);
+	
   cl::CommandQueue queue(context, devices[0]);
 
-  //write arrays A and B to the device
-  queue.enqueueWriteBuffer(vertexBufferA,CL_TRUE,0,sizeof(float)*scene.ObjectA.GetVertexArray()->getNumElements(), scene.ObjectA.GetVertexArray()->getDataPointer());
-  queue.enqueueWriteBuffer(indexBufferA,CL_TRUE,0,sizeof(int)*indicesA.size(),indicesA.data());
-  cl::KernelFunctor translate(cl::Kernel(program,"translate"),queue,cl::NullRange,cl::NullRange,cl::NullRange);
+  cl::KernelFunctor translate = kernel.bind(queue,cl::NullRange,cl::NDRange(indicesA.size()/3),cl::NDRange(maxWorkGroup));
   translate(vertexBufferA, indexBufferA, buffer_C);
 
-  float C[20];
+  float C[indicesA.size()/3];
   //read result C from the device to array C
-  queue.enqueueReadBuffer(buffer_C,CL_TRUE,0,sizeof(int)*20,C);
+  queue.enqueueReadBuffer(buffer_C,CL_TRUE,0,sizeof(float)*indicesA.size()/3, C);
 
   std::cout<<" result: \n";
-  for(int i=0;i<20;i++)
-    std::cout<<C[i]<<" ";
-  std::cout<<std::endl;
+  for(int i=0;i<indicesA.size()/3;i++)
+  {
+	  for(int j=0; j<3; j++)
+		  std::cout<<C[i*3+j]<<" ";
+	  std::cout<<std::endl;
+  }
+  std::cout<<"---------------------------"<<std::endl;
 	
 	return false;
 }

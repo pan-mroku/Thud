@@ -27,6 +27,8 @@ public:
 	cl::Program::Sources sources;
 	std::string kernelCode;
 	cl::Program program;
+	cl::Kernel kernel;
+	size_t maxWorkGroup;
 
   void Tick(Scene& scene, const double& miliseconds);
 
