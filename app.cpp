@@ -65,6 +65,8 @@ bool App::OnInit()
   gui->SetViewer(viewer);
 
   gui->Show(true);
+  gui->PhysicsEngine.CreateContext(*canvas);
+  
   canvas->SetFocus();
 
   return true;

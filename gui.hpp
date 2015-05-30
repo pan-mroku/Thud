@@ -23,13 +23,13 @@ public:
   std::vector<Scene> Scenes;
   Scene* CurrentScene;
 	wxChoice* SceneChoice;
+	Physics PhysicsEngine;
 protected:
   void onQuitButton(wxCommandEvent& event);
   
   osg::ref_ptr<osgViewer::Viewer> osgViewer;
   wxWindow* viewerWindow;
   wxChoice* algorithmChoice;
-  Physics physicsEngine;
 };
 
 #endif

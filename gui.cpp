@@ -25,7 +25,7 @@ void Gui::InitAfterXRC()
 	algorithmChoice->Bind(wxEVT_CHOICE,
 	                      [=](wxCommandEvent& event)
 	                      {
-		                      physicsEngine.ActiveAlgorithm = Physics::CollisionAlgorithmEnum(event.GetInt());
+		                      PhysicsEngine.ActiveAlgorithm = Physics::CollisionAlgorithmEnum(event.GetInt());
 	                      });
 
 	SceneChoice=(wxChoice*)FindWindow("SceneChoice");
@@ -62,9 +62,9 @@ void Gui::OnIdle(wxIdleEvent &event)
 {
 	if (!osgViewer->isRealized())
 		return;
-	((wxCheckBox*)FindWindow("AlgorithmCheckBox"))->SetValue(physicsEngine.CheckCollision(*CurrentScene));
-	((wxCheckBox*)FindWindow("SceneCheckBox"))->SetValue(physicsEngine.CheckSceneCollision(*CurrentScene));
-	physicsEngine.Tick(*CurrentScene, Timer.elapsedTime_m());
+	((wxCheckBox*)FindWindow("AlgorithmCheckBox"))->SetValue(PhysicsEngine.CheckCollision(*CurrentScene));
+	((wxCheckBox*)FindWindow("SceneCheckBox"))->SetValue(PhysicsEngine.CheckSceneCollision(*CurrentScene));
+	PhysicsEngine.Tick(*CurrentScene, Timer.elapsedTime_m());
 	Timer.reset();
 
 	osgViewer->frame();

@@ -2,6 +2,10 @@
 #define PHYSICS_HPP
 
 #include "scene.hpp"
+#include "osgcanvas.hpp"
+#include "osgtriangler.hpp"
+
+#include <CL/cl.hpp>
 
 class Physics
 {
@@ -14,10 +18,20 @@ public:
       COLLISION_ALGORITHM_TRIANGLE,
       COLLISION_ALGORITHM_OPENCL
     } CollisionAlgorithmEnum;
+	
   CollisionAlgorithmEnum ActiveAlgorithm;
-  
+
+	std::vector<cl::Platform> platforms;
+	std::vector<cl::Device> devices;
+	cl::Context context;
+	cl::Program::Sources sources;
+	std::string kernelCode;
+	cl::Program program;
+
   void Tick(Scene& scene, const double& miliseconds);
 
+	void CreateContext(osgCanvas& canvas);
+	
   bool CheckCollision(const Scene& scene);
   bool TriangleCollisionAlgorithm(const Scene& scene);
   bool OpenCLCollisionAlgorithm(const Scene& scene);
@@ -26,22 +40,6 @@ public:
 
 protected:
 private:
-};
-
-class OSGTriangler
-{
-public:
-  OSGTriangler(const Object& object);
-
-  //Zwraca false, jeśli skończyły się trójkąty. Ustawia też AnyTrianglesLeft.
-  bool GetNextTriangle();
-
-  bool AnyTrianglesLeft;
-  int elementIndex, triangleIndex;
-  osg::Vec3d v0,v1,v2;
-  const osg::Vec3Array* vertexArray;
-  osg::Geometry::DrawElementsList drawElements;
-  osg::Matrix transform;
 };
 
 #endif

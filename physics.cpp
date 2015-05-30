@@ -1,4 +1,3 @@
-
 #include "physics.hpp"
 #include "opttritri.hpp" //NoDivTriTriIsect
 
@@ -8,105 +7,45 @@
 #include <osg/Geometry>
 #include <osg/io_utils> //cout<<mat
 
-#include <CL/cl.hpp>
-
-//----------------------------------------------------------------------
-
-OSGTriangler::OSGTriangler(const Object& object):
-	elementIndex(0),
-	triangleIndex(-1),
-	AnyTrianglesLeft(true)
-{
-	vertexArray=object.GetVertexArray();
-	drawElements=object.GetElementsList();
-	transform.set(object.PAT->getWorldMatrices(object.Model)[0]);
-	GetNextTriangle();
-}
-
-bool OSGTriangler::GetNextTriangle()
-{
-	while(true)
-	{
-		if(drawElements[elementIndex]->getMode() == osg::PrimitiveSet::TRIANGLES)
-		{
-			if(triangleIndex+3>drawElements[elementIndex]->getNumIndices()-3)
-			{
-				if(elementIndex+1>=drawElements.size())
-				{
-					AnyTrianglesLeft=false;
-					return false;
-				}
-				else
-				{
-					++elementIndex;
-					triangleIndex=-1;
-					continue;
-				}
-			}
-
-			if(triangleIndex<0)
-				triangleIndex=0;
-			else
-				triangleIndex+=3;
-
-			v0=vertexArray->at(drawElements[elementIndex]->index(triangleIndex))*transform;
-			v1=vertexArray->at(drawElements[elementIndex]->index(triangleIndex+1))*transform;
-			v2=vertexArray->at(drawElements[elementIndex]->index(triangleIndex+2))*transform;
-
-			AnyTrianglesLeft=true;
-				
-			return true;
-		}
-			
-		else if(drawElements[elementIndex]->getMode() == osg::PrimitiveSet::TRIANGLE_STRIP)
-		{
-			if(triangleIndex+1>=drawElements[elementIndex]->getNumIndices())
-			{
-				if(elementIndex+1>=drawElements.size())
-				{
-					AnyTrianglesLeft=false;
-					return false;
-				}
-				else
-				{
-					++elementIndex;
-					triangleIndex=-1;
-					continue;
-				}
-			}
-
-			if(triangleIndex<0)
-			{
-				v0=vertexArray->at(drawElements[elementIndex]->index(0))*transform;
-				v1=vertexArray->at(drawElements[elementIndex]->index(1))*transform;
-				v2=vertexArray->at(drawElements[elementIndex]->index(2))*transform;
-				triangleIndex=3;
-			}
-			else
-			{
-				v0=v1;
-				v1=v2;
-				++triangleIndex;
-				v2=vertexArray->at(drawElements[elementIndex]->index(triangleIndex))*transform;
-			}
-			AnyTrianglesLeft=true;
-			return true;
-		}
-		else
-		{
-			std::cerr<<"Wrong	 element mode"<<std::endl;
-			++elementIndex;
-			triangleIndex=-1;
-			continue;
-		}
-	}
-}
-
-//------------------------------------------------------------------------
-
 Physics::Physics():
 	ActiveAlgorithm(COLLISION_ALGORITHM_TRIANGLE)
 {
+
+}
+
+void Physics::CreateContext(osgCanvas& canvas)
+{
+	cl::Platform::get(&platforms);
+
+	platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
+	bool av=0;
+	
+	int err=CL_SUCCESS;
+	context = cl::Context(devices, NULL, NULL, NULL, &err);
+
+	std::string extensions;
+	devices[0].getInfo(CL_DEVICE_EXTENSIONS, &extensions);
+	std::cerr<<extensions<<" err: "<<err<<" devices: "<<devices.size()<<std::endl;
+
+	//https://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/global.html
+	kernelCode=
+		"void kernel translate(global const float* vA, global const int* iA, global float* C){"
+		"C[get_global_id(0)]=vA[iA[get_global_id(0)]];"
+		"}";
+	
+	sources.push_back({kernelCode.c_str(),kernelCode.length()});
+
+	program = cl::Program(context,sources);
+  if(program.build({devices[0]})!=CL_SUCCESS)
+    {
+      std::cout<<" Error building: "<<program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])<<"\n";
+      exit(1);
+    }
+
+	//platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
+	/*	std::string out;
+		devices[0].getInfo(CL_DEVICE_NAME, &out);
+		std::cerr<<out<<std::endl;*/ //combobox?	
 }
 
 void Physics::Tick(Scene& scene, const double& miliseconds)
@@ -165,24 +104,54 @@ bool Physics::TriangleCollisionAlgorithm(const Scene& scene)
 	for(OSGTriangler trianglerA(scene.ObjectA); trianglerA.AnyTrianglesLeft; trianglerA.GetNextTriangle())
 		for(OSGTriangler trianglerB(scene.ObjectB); trianglerB.AnyTrianglesLeft; trianglerB.GetNextTriangle())
 			if(NoDivTriTriIsect(trianglerA.v0._v, trianglerA.v1._v, trianglerA.v2._v,
-													trianglerB.v0._v, trianglerB.v1._v, trianglerB.v2._v))
+			                    trianglerB.v0._v, trianglerB.v1._v, trianglerB.v2._v))
 				return true;
 	return false;
 }
 
 bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 {
-	std::vector<cl::Platform> platforms;
-	cl::Platform::get(&platforms);
-	std::vector<cl::Device> devices;
-	platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
-	/*	std::string out;
-		devices[0].getInfo(CL_DEVICE_NAME, &out);
-	std::cerr<<out<<std::endl;*/ //combobox?
-	std::vector<size_t> out;
-	devices[0].getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &out);
-	for(auto o: out)
-		std::cerr<<o<<std::endl;
+	OSGTriangler trianglerA(scene.ObjectA), trianglerB(scene.ObjectB);
+	std::vector<int> indicesA, indicesB;
+	for(; trianglerA.AnyTrianglesLeft; trianglerA.GetNextTriangle())
+	{
+		indicesA.push_back(trianglerA.index);
+		indicesA.push_back(trianglerA.index+1);
+		indicesA.push_back(trianglerA.index+2);
+	}
+		//https://developer.apple.com/library/mac/documentation/Performance/Conceptual/OpenCL_MacProgGuide/CreatingandManagingBufferObjectsInOpenCL/CreatingandManagingBufferObjectsInOpenCL.html
+	//http://stackoverflow.com/questions/9565253/benchmark-of-cl-mem-use-host-ptr-and-cl-mem-copy-host-ptr-in-opencl
+	cl_int err;
+
+	cl::Buffer vertexBufferA(context,	CL_MEM_USE_HOST_PTR, (GLuint)scene.ObjectA.GetVertexArray()->getNumElements(), (void*)scene.ObjectA.GetVertexArray()->getDataPointer(), &err);
+	if(err)
+		std::cerr<<err<<std::endl;			
+	cl::Buffer indexBufferA(context,	CL_MEM_USE_HOST_PTR, (GLuint)indicesA.size(), indicesA.data(), &err);
+	if(err)
+		std::cerr<<err<<std::endl;			
+	//cl::Buffer bufferB(context,	CL_MEM_READ_ONLY, (GLuint)1, nullptr, &err);
+
+
+	 cl::Buffer buffer_C(context,CL_MEM_READ_WRITE,sizeof(int)*10);
+	
+	//create queue to which we will push commands for the device.
+  cl::CommandQueue queue(context, devices[0]);
+
+  //write arrays A and B to the device
+  queue.enqueueWriteBuffer(vertexBufferA,CL_TRUE,0,sizeof(float)*scene.ObjectA.GetVertexArray()->getNumElements(), scene.ObjectA.GetVertexArray()->getDataPointer());
+  queue.enqueueWriteBuffer(indexBufferA,CL_TRUE,0,sizeof(int)*indicesA.size(),indicesA.data());
+  cl::KernelFunctor translate(cl::Kernel(program,"translate"),queue,cl::NullRange,cl::NullRange,cl::NullRange);
+  translate(vertexBufferA, indexBufferA, buffer_C);
+
+  float C[20];
+  //read result C from the device to array C
+  queue.enqueueReadBuffer(buffer_C,CL_TRUE,0,sizeof(int)*20,C);
+
+  std::cout<<" result: \n";
+  for(int i=0;i<20;i++)
+    std::cout<<C[i]<<" ";
+  std::cout<<std::endl;
+	
 	return false;
 }
 
