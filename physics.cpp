@@ -2,13 +2,16 @@
 #include "opttritri.hpp" //NoDivTriTriIsect
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/io_utils> //cout<<mat
 
 Physics::Physics():
-	ActiveAlgorithm(COLLISION_ALGORITHM_TRIANGLE)
+	ActiveAlgorithm(COLLISION_ALGORITHM_TRIANGLE),
+	kernelCode("")
 {
 
 }
@@ -23,37 +26,36 @@ void Physics::CreateContext(osgCanvas& canvas)
 	int err=CL_SUCCESS;
 	context = cl::Context(devices, NULL, NULL, NULL, &err);
 
-	//@TODO:wsadzić do jakiegoś pliku tekstowego, żęby bylo łatwiej
-	kernelCode=
-		"void kernel CollisionWithJumps(global const int* triangleCount, global const float* vA, global const int* iA, global float* C){"
-		  "int index = get_global_id(0);"
-  		"C[3*index]=triangleCount[1];"
-   		"C[3*index+1]=1;"
-  		"C[3*index+2]=triangleCount[0];"
-		"}";
+	std::string tmp;
+	for(std::fstream file("CollisionWithJumps.cl"); std::getline(file, tmp);)
+		kernelCode+=tmp;
 	
 	sources.push_back({kernelCode.c_str(), kernelCode.length()});
 
 	program = cl::Program(context, sources, &err);
 	if(err!=CL_SUCCESS)
 		std::cerr<<"Program creation error: "<<err<<std::endl;			
-  if(program.build({devices[0]})!=CL_SUCCESS)
-    {
-      std::cout<<" Error building: "<<program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])<<"\n";
-      exit(1);
-    }
+	if(program.build({devices[0]})!=CL_SUCCESS)
+	{
+		std::cout<<" Error building: "<<program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])<<"\n";
+		exit(1);
+	}
 
-  kernel = cl::Kernel(program, "CollisionWithJumps", &err);
-  if(err!=CL_SUCCESS)
-	  std::cerr<<"kernel creation error: "<<err<<std::endl;			
+	kernel = cl::Kernel(program, "CollisionWithJumps", &err);
+	if(err!=CL_SUCCESS)
+		std::cerr<<"kernel creation error: "<<err<<std::endl;			
 
+	//http://stackoverflow.com/questions/23017005/determine-max-global-work-group-size-based-on-device-memory-in-opencl
 	std::string extensions="";
+	unsigned long memSize=0, maxMemAlloc=0;
 	size_t computeUnits=0;
 	devices[0].getInfo(CL_DEVICE_EXTENSIONS, &extensions);
 	devices[0].getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &computeUnits);
+	devices[0].getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &maxMemAlloc);
+	devices[0].getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &memSize);
 	kernel.getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &maxWorkGroup);
-	std::cerr<<"ext: "<<extensions<<std::endl<<"max units: "<<computeUnits<<" max work group: "<<maxWorkGroup<<" err: "<<err<<" devices: "<<devices.size()<<std::endl;
-  
+	std::cerr<<"ext: "<<extensions<<std::endl<<"max units: "<<computeUnits<<" max work group: "<<maxWorkGroup<<" err: "<<err<<" devices: "<<devices.size()<<" max mem alloc: "<<maxMemAlloc<<" global mem size: "<<memSize<<std::endl;
+	
 	//platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
 	/*	std::string out;
 		devices[0].getInfo(CL_DEVICE_NAME, &out);
@@ -80,19 +82,19 @@ void Physics::Tick(Scene& scene, const double& miliseconds)
  
 	scene.ObjectB.PAT->setPosition(scene.ObjectB.PAT->getPosition()+scene.ObjectB.MoveVector*(miliseconds/1000));
 	if(scene.ObjectB.PAT->getPosition().x()>0)
-		{
-			osg::Vec3d position=scene.ObjectB.PAT->getPosition();
-			position.x()=0;
-			scene.ObjectB.PAT->setPosition(position);
-			scene.ObjectB.MoveVector*=-1;
-		}
-		else if(scene.ObjectB.PAT->getPosition().x()<-2)
-		{
-			osg::Vec3d position=scene.ObjectB.PAT->getPosition();
-			position.x()=-2;
-			scene.ObjectB.PAT->setPosition(position);
-			scene.ObjectB.MoveVector*=-1;
-		}
+	{
+		osg::Vec3d position=scene.ObjectB.PAT->getPosition();
+		position.x()=0;
+		scene.ObjectB.PAT->setPosition(position);
+		scene.ObjectB.MoveVector*=-1;
+	}
+	else if(scene.ObjectB.PAT->getPosition().x()<-2)
+	{
+		osg::Vec3d position=scene.ObjectB.PAT->getPosition();
+		position.x()=-2;
+		scene.ObjectB.PAT->setPosition(position);
+		scene.ObjectB.MoveVector*=-1;
+	}
 }
 
 bool Physics::CheckCollision(const Scene& scene)
@@ -145,64 +147,70 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 
 	cl_int err;
 
-  cl::CommandQueue queue(context, devices[0]);
-  //http://stackoverflow.com/questions/9565253/benchmark-of-cl-mem-use-host-ptr-and-cl-mem-copy-host-ptr-in-opencl
+	cl::CommandQueue queue(context, devices[0]);
+	//http://stackoverflow.com/questions/9565253/benchmark-of-cl-mem-use-host-ptr-and-cl-mem-copy-host-ptr-in-opencl
 	//http://www.cs.virginia.edu/~mwb7w/cuda_support/pinned_tradeoff.html
-  cl::Buffer transformBufferA(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR | CL_MEM_ALLOC_HOST_PTR, sizeof(float)*4*4, trianglerA.transform.ptr(), &err);
+	cl::Buffer transformBufferA(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*4*4, trianglerA.transform.ptr(), &err);
 	if(err)
 		std::cerr<<err<<std::endl;
-	cl::Buffer triangleCountBuffer(context, CL_MEM_READ_ONLY| CL_MEM_COPY_HOST_PTR | CL_MEM_ALLOC_HOST_PTR, triangleCountVector.size()*sizeof(int), triangleCountVector.data(), &err);
-	if(err)
-		std::cerr<<err<<std::endl;
-	cl::Buffer vertexBufferA(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR | CL_MEM_ALLOC_HOST_PTR, (GLuint)sizeof(float)*scene.ObjectA.GetVertexArray()->getNumElements(), (void*)scene.ObjectA.GetVertexArray()->getDataPointer(), &err);
-	if(err)
-		std::cerr<<err<<std::endl;			
-	cl::Buffer indexBufferA(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR | CL_MEM_ALLOC_HOST_PTR, sizeof(int)*indicesA.size(), indicesA.data(), &err);
-	if(err)
-		std::cerr<<err<<std::endl;			
-	
-	cl::Buffer buffer_C(context, CL_MEM_WRITE_ONLY, sizeof(float)*indicesA.size(), NULL, &err);
+	cl::Buffer triangleCountBuffer(context, CL_MEM_READ_ONLY| CL_MEM_COPY_HOST_PTR, triangleCountVector.size()*sizeof(int), triangleCountVector.data(), &err);
 	if(err)
 		std::cerr<<err<<std::endl;
 
+	cl::Buffer vertexBufferA(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*scene.ObjectA.GetVertexArray()->getNumElements(), (void*)scene.ObjectA.GetVertexArray()->getDataPointer(), &err);
+	if(err)
+		std::cerr<<err<<std::endl;			
+	cl::Buffer indexBufferA(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int)*indicesA.size(), indicesA.data(), &err);
+	if(err)
+		std::cerr<<err<<std::endl;
+
+	cl::Buffer vertexBufferB(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*scene.ObjectB.GetVertexArray()->getNumElements(), (void*)scene.ObjectB.GetVertexArray()->getDataPointer(), &err);
+	if(err)
+		std::cerr<<err<<std::endl;			
+	cl::Buffer indexBufferB(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(int)*indicesB.size(), indicesB.data(), &err);
+	if(err)
+		std::cerr<<err<<std::endl;
+	
+	cl::Buffer bufferC(context, CL_MEM_WRITE_ONLY, sizeof(bool)*triangleCountVector[2], NULL, &err);
+	if(err)
+		std::cerr<<err<<std::endl;
+
+	std::cerr<<"Needed memory: "<<triangleCountVector.size()*sizeof(int)+sizeof(float)*scene.ObjectA.GetVertexArray()->getNumElements()+sizeof(float)*scene.ObjectB.GetVertexArray()->getNumElements()+ sizeof(int)*indicesA.size()+sizeof(int)*indicesB.size()+sizeof(bool)*triangleCountVector[2]<<std::endl;
+	
 	//global się musi dzielić przez local, jeśli nie zostawiamy tego do ogarnęcia opencl
 	//0 być nie może. musi być wtedy nullrange
+	//jest pewne maksimum global worksize, ale nie wiem jakie. Trzeba to ogarnąć i dopasować kernel, żeby liczył po kilka par po kolei
+	//dla 12x12 302250
 	cl::KernelFunctor CollisionWithJumps = kernel.bind(queue, cl::NDRange(triangleCountVector[2]), cl::NullRange);
-  CollisionWithJumps(triangleCountBuffer, vertexBufferA, indexBufferA, buffer_C);
+	CollisionWithJumps(triangleCountBuffer, vertexBufferA, indexBufferA, vertexBufferB, indexBufferB, bufferC);
+	err = CollisionWithJumps.getError();
+	if (err != CL_SUCCESS)
+	{
+		std::cerr<<"Kernel error: "<<err<<std::endl;
+		return false;
+	}
 
-  float C[indicesA.size()];
-  for(int i=0; i<indicesA.size(); i++)
-	  C[i]=-0.5;
-  //read result C from the device to array C
-  err = queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(float)*indicesA.size(), C);
-  if (err != CL_SUCCESS)
-	  std::cerr<<"Read error: "<<err<<std::endl;
+	bool C[triangleCountVector[2]];
+	for(int i=0; i<triangleCountVector[2]; i++)
+		C[i]=false;
+	//read result C from the device to array C
+	err = queue.enqueueReadBuffer(bufferC, CL_TRUE, 0, sizeof(bool)*triangleCountVector[2], C);
+	if (err != CL_SUCCESS)
+	{
+		std::cerr<<"Read error: "<<err<<std::endl;
+		return false;
+	}
 
-  std::cout<<"test: \n";
-  for(int i=0;i<indicesA.size()/3;i++)
-  {
-	  for(int j=0; j<3; j++)
-		  std::cout<<"["<<indicesA[i*3+j]<<"]: "<<static_cast<const osg::Vec3f*>(scene.ObjectA.GetVertexArray()->getDataPointer())[indicesA[i*3+j]]<<"; ";
-	  std::cout<<std::endl;
-  }
-  std::cout<<"--------"<<std::endl;
-  
-  std::cout<<"result: \n";
-  for(int i=0;i<indicesA.size()/3;i++)
-  {
-	  for(int j=0; j<3; j++)
-	  {
-		  std::cout<<C[i*3+j]<<" ";
-	  }
-	  std::cout<<"; ";
-	  std::cout<<std::endl;
-  }
-  for(int i=0;i<indicesA.size();i++)
-	  std::cout<<C[i]<<" ";
-  std::cout<<std::endl;
-  std::cout<<"---------------------------"<<std::endl;
+	std::cout<<"result: \n";
+	for(int x=0; x<triangleCountVector[0]; x++)
+	{
+		for(int y=0; y<triangleCountVector[1]; y++)
+			std::cout<<C[x*triangleCountVector[1]+y]<<" ";
+		std::cout<<std::endl;
+	}
+	std::cout<<"---------------------------"<<std::endl;
 
-  return false;
+	return false;
 }
 
 bool Physics::CheckSceneCollision(const Scene& scene)
