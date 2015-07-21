@@ -9,6 +9,8 @@
 #include <osg/Geometry>
 #include <osg/io_utils> //cout<<mat
 
+#include <cstdlib> //exit
+
 Physics::Physics():
 	ActiveAlgorithm(COLLISION_ALGORITHM_TRIANGLE),
 	kernelCode("")
@@ -175,22 +177,38 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 	if(err)
 		std::cerr<<err<<std::endl;
 
-	std::cerr<<"Needed memory: "<<triangleCountVector.size()*sizeof(int)+sizeof(float)*scene.ObjectA.GetVertexArray()->getNumElements()+sizeof(float)*scene.ObjectB.GetVertexArray()->getNumElements()+ sizeof(int)*indicesA.size()+sizeof(int)*indicesB.size()+sizeof(bool)*triangleCountVector[2]<<std::endl;
+	std::cerr<<"Needed memory: "<<
+		triangleCountVector.size()*sizeof(int)
+		+sizeof(float)*scene.ObjectA.GetVertexArray()->getNumElements()
+		+sizeof(int)*indicesA.size()
+		+sizeof(float)*scene.ObjectB.GetVertexArray()->getNumElements()
+		+sizeof(int)*indicesB.size()
+		+sizeof(bool)*triangleCountVector[2]
+	         <<std::endl;
 	
 	//global się musi dzielić przez local, jeśli nie zostawiamy tego do ogarnęcia opencl
 	//0 być nie może. musi być wtedy nullrange
-	//jest pewne maksimum global worksize, ale nie wiem jakie. Trzeba to ogarnąć i dopasować kernel, żeby liczył po kilka par po kolei
-	//dla 12x12 302250
-	cl::KernelFunctor CollisionWithJumps = kernel.bind(queue, cl::NDRange(triangleCountVector[2]), cl::NullRange);
-	CollisionWithJumps(triangleCountBuffer, vertexBufferA, indexBufferA, vertexBufferB, indexBufferB, bufferC);
-	err = CollisionWithJumps.getError();
+	std::clog<<"Number of triangle pairs: "<<triangleCountVector[2]<<std::endl;
+	kernel.setArg(0, triangleCountBuffer);
+	kernel.setArg(1, vertexBufferA);
+	kernel.setArg(2, indexBufferA);
+	kernel.setArg(3, vertexBufferB);
+	kernel.setArg(4, indexBufferB);
+	kernel.setArg(5, bufferC);
+	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(triangleCountVector[2]), cl::NullRange);
+	if (err != CL_SUCCESS)
+	{
+		std::cerr<<"Queue error: "<<err<<std::endl;
+		return false;
+	}
+	err = queue.finish();
 	if (err != CL_SUCCESS)
 	{
 		std::cerr<<"Kernel error: "<<err<<std::endl;
 		return false;
 	}
 
-	bool C[triangleCountVector[2]];
+	bool C[triangleCountVector[2]]; //Dla 4k*4k rzuca segfaultem (nic dziwnego w sumie)
 	for(int i=0; i<triangleCountVector[2]; i++)
 		C[i]=false;
 	//read result C from the device to array C

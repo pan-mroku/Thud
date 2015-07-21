@@ -5,7 +5,5 @@ void kernel CollisionWithJumps(global const int* triangleCount, global const flo
 	if(index > triangleCount[2])
 		return;
 	
-	C[3*index]=triangleCount[1];
-	C[3*index+1]=1;
-	C[3*index+2]=triangleCount[0];
+	C[index]=triangleCount[0];
 };
