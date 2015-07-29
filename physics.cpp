@@ -208,7 +208,8 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 		return false;
 	}
 
-	bool C[triangleCountVector[2]]; //Dla 4k*4k rzuca segfaultem (nic dziwnego w sumie)
+	bool* C;
+	C = new bool[triangleCountVector[2]]; //Bez alokacji w runtime dla 4k*4k rzuca segfaultem (nic dziwnego w sumie)
 	for(int i=0; i<triangleCountVector[2]; i++)
 		C[i]=false;
 	//read result C from the device to array C
@@ -216,6 +217,7 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 	if (err != CL_SUCCESS)
 	{
 		std::cerr<<"Read error: "<<err<<std::endl;
+		delete[] C;
 		return false;
 	}
 
@@ -228,6 +230,7 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 	}
 	std::cout<<"---------------------------"<<std::endl;
 
+	delete[] C;
 	return false;
 }
 
