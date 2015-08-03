@@ -29,8 +29,10 @@ void Physics::CreateContext(osgCanvas& canvas)
 	context = cl::Context(devices, NULL, NULL, NULL, &err);
 
 	std::string tmp;
-	for(std::fstream file("CollisionWithJumps.cl"); std::getline(file, tmp);)
-		kernelCode+=tmp;
+	std::fstream file("CollisionWithJumps.cl");
+	std::stringstream ss;
+	ss<<file.rdbuf();
+	kernelCode=ss.str();
 	
 	sources.push_back({kernelCode.c_str(), kernelCode.length()});
 
