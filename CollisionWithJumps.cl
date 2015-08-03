@@ -163,8 +163,8 @@ int coplanar_tri_tri(float N[3],float V0[3],float V1[3],float V2[3],
 
 
 
-bool NoDivTriTriIsect(const global float V0[3], const global float V1[3], const global float V2[3],
-                     const global float U0[3], const global float U1[3], const global float U2[3])
+bool NoDivTriTriIsect(float V0[3], float V1[3], float V2[3],
+                      float U0[3], float U1[3], float U2[3])
 {
   float E1[3],E2[3];
   float N1[3],N2[3],d1,d2;
@@ -176,7 +176,8 @@ bool NoDivTriTriIsect(const global float V0[3], const global float V1[3], const 
   float vp0,vp1,vp2;
   float up0,up1,up2;
   float bb,cc,max;
-
+  //@DEBUG
+  return true;
   /* compute plane equation of triangle(V0,V1,V2) */
   SUB(E1,V1,V0);
   SUB(E2,V2,V0);
@@ -276,7 +277,18 @@ bool NoDivTriTriIsect(const global float V0[3], const global float V1[3], const 
   return true;
 }
 
-void kernel CollisionWithJumps(global const int* triangleCount, global const float* vA, global const int* iA, global const float* vB, global const int* iB, global bool* C)
+void PreMult(float r[3], const global float* V, const global float* mat)
+{
+	float D = 1.0f / (mat[0*3]*V[0] + mat[1*3]*V[1] + mat[2*3]*V[2] + mat[3*3]);
+	float x = (mat[0*0]*V[0] + mat[1*0]*V[1] + mat[2*0]*V[2] + mat[3*0])*D;
+	float y = (mat[0*1]*V[0] + mat[1*1]*V[1] + mat[2*1]*V[2] + mat[3*1])*D;
+	float z = (mat[0*2]*V[0] + mat[1*2]*V[1] + mat[2*2]*V[2] + mat[3*2])*D;
+	r[0]=x;
+	r[1]=y;
+	r[2]=z;
+}
+
+void kernel CollisionWithJumps(global const int* triangleCount, global const float* mA, global const float* vA, global const int* iA, global const float* mB, global const float* vB, global const int* iB, global bool* C)
 {
 	int index = get_global_id(0);
 	
@@ -285,7 +297,14 @@ void kernel CollisionWithJumps(global const int* triangleCount, global const flo
 	
 	int indexA=triangleCount[2]/triangleCount[0];
 	int indexB=triangleCount[2]/triangleCount[1];
-	
- C[index]=NoDivTriTriIsect(&vA[iA[indexA]], &vA[iA[indexA+1]], &vA[iA[indexA+2]],
-                           &vB[iB[indexB]], &vB[iB[indexB+1]], &vB[iB[indexB+2]]);
+	float V0[3]; float V1[3]; float V2[3];
+	float U0[3]; float U1[3]; float U2[3];
+	PreMult(V0, &vA[iA[indexA]], &mA);
+	PreMult(V1, &vA[iA[indexA+1]], &mA);
+	PreMult(V2, &vA[iA[indexA+2]], &mA);
+	PreMult(U0, &vB[iB[indexB]], &mB);
+	PreMult(U1, &vB[iB[indexB+1]], &mB);
+	PreMult(U2, &vB[iB[indexB+2]], &mB);
+	//@TODO: tu się rzuca
+	C[index]=NoDivTriTriIsect(V0, V1, V2, U0, U1, U2);
 };

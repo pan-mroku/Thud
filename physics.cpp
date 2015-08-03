@@ -157,6 +157,9 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 	cl::Buffer transformBufferA(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*4*4, trianglerA.transform.ptr(), &err);
 	if(err)
 		std::cerr<<err<<std::endl;
+	cl::Buffer transformBufferB(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*4*4, trianglerB.transform.ptr(), &err);
+	if(err)
+		std::cerr<<err<<std::endl;
 	cl::Buffer triangleCountBuffer(context, CL_MEM_READ_ONLY| CL_MEM_COPY_HOST_PTR, triangleCountVector.size()*sizeof(int), triangleCountVector.data(), &err);
 	if(err)
 		std::cerr<<err<<std::endl;
@@ -192,11 +195,13 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 	//0 być nie może. musi być wtedy nullrange
 	std::clog<<"Number of triangle pairs: "<<triangleCountVector[2]<<std::endl;
 	kernel.setArg(0, triangleCountBuffer);
-	kernel.setArg(1, vertexBufferA);
-	kernel.setArg(2, indexBufferA);
-	kernel.setArg(3, vertexBufferB);
-	kernel.setArg(4, indexBufferB);
-	kernel.setArg(5, bufferC);
+	kernel.setArg(1, transformBufferA);
+	kernel.setArg(2, vertexBufferA);
+	kernel.setArg(3, indexBufferA);
+	kernel.setArg(4, transformBufferB);
+	kernel.setArg(5, vertexBufferB);
+	kernel.setArg(6, indexBufferB);
+	kernel.setArg(7, bufferC);
 	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(triangleCountVector[2]), cl::NullRange);
 	if (err != CL_SUCCESS)
 	{

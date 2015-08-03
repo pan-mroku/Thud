@@ -1,6 +1,7 @@
 #include "osgtriangler.hpp"
 
 #include <iostream>
+#include <osg/io_utils> //cout<<matrix
 
 OSGTriangler::OSGTriangler(const Object& object):
 	elementIndex(0),
@@ -11,6 +12,7 @@ OSGTriangler::OSGTriangler(const Object& object):
 	vertexArray=object.GetVertexArray();
 	drawElements=object.GetElementsList();
 	transform.set(object.PAT->getWorldMatrices(object.Model)[0]);
+	//std::clog<<transform<<std::endl;
 	GetNextTriangle();
 }
 
