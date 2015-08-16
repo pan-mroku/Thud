@@ -1,5 +1,7 @@
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+
 #define USE_EPSILON_TEST TRUE
-#define EPSILON 0.000001
+#define EPSILON 0.001
 
 
 #define CROSS(dest,v1,v2){                     \
@@ -17,7 +19,7 @@
 #define SORT(a,b)       \
              if(a>b)    \
              {          \
-               float c; \
+               double c; \
                c=a;     \
                a=b;     \
                b=c;     \
@@ -46,7 +48,7 @@
 
 #define EDGE_AGAINST_TRI_EDGES(V0,V1,U0,U1,U2) \
 {                                              \
-  float Ax,Ay,Bx,By,Cx,Cy,e,d,f;               \
+  double Ax,Ay,Bx,By,Cx,Cy,e,d,f;               \
   Ax=V1[i0]-V0[i0];                            \
   Ay=V1[i1]-V0[i1];                            \
   EDGE_EDGE_TEST(V0,U0,U1);                    \
@@ -56,7 +58,7 @@
 
 #define POINT_IN_TRI(V0,U0,U1,U2)           \
 {                                           \
-  float a,b,c,d0,d1,d2;                     \
+  double a,b,c,d0,d1,d2;                     \
   a=U1[i1]-U0[i1];                          \
   b=-(U1[i0]-U0[i0]);                       \
   c=-a*U0[i0]-b*U0[i1];                     \
@@ -77,10 +79,10 @@
   }                                         \
 }
 
-int coplanar_tri_tri(float N[3],float V0[3],float V1[3],float V2[3],
-                     float U0[3],float U1[3],float U2[3])
+int coplanar_tri_tri(double N[3],double V0[3],double V1[3],double V2[3],
+                     double U0[3],double U1[3],double U2[3])
 {
-   float A[3];
+   double A[3];
    short i0,i1;
    /* first project onto an axis-aligned plane, that maximizes the area */
    /* of the triangles, compute indices: i0,i1. */
@@ -163,21 +165,20 @@ int coplanar_tri_tri(float N[3],float V0[3],float V1[3],float V2[3],
 
 
 
-bool NoDivTriTriIsect(float V0[3], float V1[3], float V2[3],
-                      float U0[3], float U1[3], float U2[3])
+bool NoDivTriTriIsect(double V0[3], double V1[3], double V2[3],
+                     double U0[3], double U1[3], double U2[3])
 {
-  float E1[3],E2[3];
-  float N1[3],N2[3],d1,d2;
-  float du0,du1,du2,dv0,dv1,dv2;
-  float D[3];
-  float isect1[2], isect2[2];
-  float du0du1,du0du2,dv0dv1,dv0dv2;
+  double E1[3],E2[3];
+  double N1[3],N2[3],d1,d2;
+  double du0,du1,du2,dv0,dv1,dv2;
+  double D[3];
+  double isect1[2], isect2[2];
+  double du0du1,du0du2,dv0dv1,dv0dv2;
   short index;
-  float vp0,vp1,vp2;
-  float up0,up1,up2;
-  float bb,cc,max;
-  //@DEBUG
-  return true;
+  double vp0,vp1,vp2;
+  double up0,up1,up2;
+  double bb,cc,max;
+
   /* compute plane equation of triangle(V0,V1,V2) */
   SUB(E1,V1,V0);
   SUB(E2,V2,V0);
@@ -201,7 +202,6 @@ bool NoDivTriTriIsect(float V0[3], float V1[3], float V2[3],
 
   /* same sign on all of them + not equal 0 ? */
   /* no intersection occurs */
-
   if(du0du1>0.0f && du0du2>0.0f)
     return false;
 
@@ -233,10 +233,10 @@ bool NoDivTriTriIsect(float V0[3], float V1[3], float V2[3],
   CROSS(D,N1,N2);
 
   /* compute and index to the largest component of D */
-  max=(float)fabs(D[0]);
+  max=(double)fabs(D[0]);
   index=0;
-  bb=(float)fabs(D[1]);
-  cc=(float)fabs(D[2]);
+  bb=(double)fabs(D[1]);
+  cc=(double)fabs(D[2]);
   if(bb>max) max=bb,index=1;
   if(cc>max) max=cc,index=2;
 
@@ -250,14 +250,14 @@ bool NoDivTriTriIsect(float V0[3], float V1[3], float V2[3],
   up2=U2[index];
 
   /* compute interval for triangle 1 */
-  float a,b,c,x0,x1;
+  double a,b,c,x0,x1;
   NEWCOMPUTE_INTERVALS(vp0,vp1,vp2,dv0,dv1,dv2,dv0dv1,dv0dv2,a,b,c,x0,x1);
 
   /* compute interval for triangle 2 */
-  float d,e,f,y0,y1;
+  double d,e,f,y0,y1;
   NEWCOMPUTE_INTERVALS(up0,up1,up2,du0,du1,du2,du0du1,du0du2,d,e,f,y0,y1);
 
-  float xx,yy,xxyy,tmp;
+  double xx,yy,xxyy,tmp;
   xx=x0*x1;
   yy=y0*y1;
   xxyy=xx*yy;
@@ -277,34 +277,32 @@ bool NoDivTriTriIsect(float V0[3], float V1[3], float V2[3],
   return true;
 }
 
-void PreMult(float r[3], const global float* V, const global float* mat)
+void PreMult(double r[3], const global float* V, const global double* mat)
 {
-	float D = 1.0f / (mat[0*3]*V[0] + mat[1*3]*V[1] + mat[2*3]*V[2] + mat[3*3]);
-	float x = (mat[0*0]*V[0] + mat[1*0]*V[1] + mat[2*0]*V[2] + mat[3*0])*D;
-	float y = (mat[0*1]*V[0] + mat[1*1]*V[1] + mat[2*1]*V[2] + mat[3*1])*D;
-	float z = (mat[0*2]*V[0] + mat[1*2]*V[1] + mat[2*2]*V[2] + mat[3*2])*D;
-	r[0]=x;
-	r[1]=y;
-	r[2]=z;
+	double D = 1.0 / (mat[4*0+3]*V[0] + mat[4*1+3]*V[1] + mat[4*2+3]*V[2] + mat[3*4+3]);
+	r[0] = (mat[4*0+0]*V[0] + mat[4*1+0]*V[1] + mat[4*2+0]*V[2] + mat[4*3+0])*D;
+	r[1] = (mat[4*0+1]*V[0] + mat[4*1+1]*V[1] + mat[4*2+1]*V[2] + mat[4*3+1])*D;
+	r[2] = (mat[4*0+2]*V[0] + mat[4*1+2]*V[1] + mat[4*2+2]*V[2] + mat[4*3+2])*D;
 }
 
-void kernel CollisionWithJumps(global const int* triangleCount, global const float* mA, global const float* vA, global const int* iA, global const float* mB, global const float* vB, global const int* iB, global bool* C)
+void kernel CollisionWithJumps(global const int* triangleCount, global const double* mA, global const float* vA, global const int* iA, global const double* mB, global const float* vB, global const int* iB, global bool* C)
 {
 	int index = get_global_id(0);
 	
 	if(index > triangleCount[2])
 		return;
 	
-	int indexA=triangleCount[2]/triangleCount[0];
-	int indexB=triangleCount[2]/triangleCount[1];
-	float V0[3]; float V1[3]; float V2[3];
-	float U0[3]; float U1[3]; float U2[3];
-	PreMult(V0, &vA[iA[indexA]], &mA);
-	PreMult(V1, &vA[iA[indexA+1]], &mA);
-	PreMult(V2, &vA[iA[indexA+2]], &mA);
-	PreMult(U0, &vB[iB[indexB]], &mB);
-	PreMult(U1, &vB[iB[indexB+1]], &mB);
-	PreMult(U2, &vB[iB[indexB+2]], &mB);
-	//@TODO: tu się rzuca
+	int indexA=index/triangleCount[0];
+	int indexB=index%triangleCount[1];
+	double V0[3]; double V1[3]; double V2[3];
+	double U0[3]; double U1[3]; double U2[3];
+	PreMult(V0, &vA[iA[3*indexA]], mA);
+	PreMult(V1, &vA[iA[3*indexA+1]], mA);
+	PreMult(V2, &vA[iA[3*indexA+2]], mA);
+	PreMult(U0, &vB[iB[3*indexB]], mB);
+	PreMult(U1, &vB[iB[3*indexB+1]], mB);
+	PreMult(U2, &vB[iB[3*indexB+2]], mB);
 	C[index]=NoDivTriTriIsect(V0, V1, V2, U0, U1, U2);
+
+	return;
 };

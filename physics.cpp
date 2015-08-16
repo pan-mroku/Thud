@@ -130,13 +130,13 @@ bool Physics::TriangleCollisionAlgorithm(const Scene& scene)
 bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 {
 	OSGTriangler trianglerA(scene.ObjectA), trianglerB(scene.ObjectB);
-	std::vector<float> verticesA, verticesB;
 	std::vector<int> indicesA, indicesB;
 	for(; trianglerA.AnyTrianglesLeft; trianglerA.GetNextTriangle())
 	{
 		indicesA.push_back(trianglerA.index0);
 		indicesA.push_back(trianglerA.index1);
 		indicesA.push_back(trianglerA.index2);
+		
 	}
 	for(; trianglerB.AnyTrianglesLeft; trianglerB.GetNextTriangle())
 	{
@@ -154,10 +154,10 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 	cl::CommandQueue queue(context, devices[0]);
 	//http://stackoverflow.com/questions/9565253/benchmark-of-cl-mem-use-host-ptr-and-cl-mem-copy-host-ptr-in-opencl
 	//http://www.cs.virginia.edu/~mwb7w/cuda_support/pinned_tradeoff.html
-	cl::Buffer transformBufferA(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*4*4, trianglerA.transform.ptr(), &err);
+	cl::Buffer transformBufferA(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(double)*4*4, trianglerA.transform.ptr(), &err);
 	if(err)
 		std::cerr<<err<<std::endl;
-	cl::Buffer transformBufferB(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float)*4*4, trianglerB.transform.ptr(), &err);
+	cl::Buffer transformBufferB(context,	CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(double)*4*4, trianglerB.transform.ptr(), &err);
 	if(err)
 		std::cerr<<err<<std::endl;
 	cl::Buffer triangleCountBuffer(context, CL_MEM_READ_ONLY| CL_MEM_COPY_HOST_PTR, triangleCountVector.size()*sizeof(int), triangleCountVector.data(), &err);
@@ -182,18 +182,8 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 	if(err)
 		std::cerr<<err<<std::endl;
 
-	std::cerr<<"Needed memory: "<<
-		triangleCountVector.size()*sizeof(int)
-		+sizeof(float)*scene.ObjectA.GetVertexArray()->getNumElements()
-		+sizeof(int)*indicesA.size()
-		+sizeof(float)*scene.ObjectB.GetVertexArray()->getNumElements()
-		+sizeof(int)*indicesB.size()
-		+sizeof(bool)*triangleCountVector[2]
-	         <<std::endl;
-	
 	//global się musi dzielić przez local, jeśli nie zostawiamy tego do ogarnęcia opencl
 	//0 być nie może. musi być wtedy nullrange
-	std::clog<<"Number of triangle pairs: "<<triangleCountVector[2]<<std::endl;
 	kernel.setArg(0, triangleCountBuffer);
 	kernel.setArg(1, transformBufferA);
 	kernel.setArg(2, vertexBufferA);
@@ -228,14 +218,12 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 		return false;
 	}
 
-	std::cout<<"result: \n";
-	for(int x=0; x<triangleCountVector[0]; x++)
-	{
-		for(int y=0; y<triangleCountVector[1]; y++)
-			std::cout<<C[x*triangleCountVector[1]+y]<<" ";
-		std::cout<<std::endl;
-	}
-	std::cout<<"---------------------------"<<std::endl;
+	for(int i=0; i<triangleCountVector[2]; i++)
+		if(C[i]==1)
+		{
+			delete[] C;
+			return true;
+		}
 
 	delete[] C;
 	return false;
