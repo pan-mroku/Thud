@@ -65,7 +65,13 @@ bool App::OnInit()
   gui->SetViewer(viewer);
 
   gui->Show(true);
-  gui->PhysicsEngine.CreateContext(*canvas);
+  gui->PhysicsEngine.CreateContext();
+
+  for(int i=0; i<=gui->PhysicsEngine.maxWorkGroup; i++)
+	  gui->WorkGroupCombo->Append(wxString::Format(wxT("%i"), i));
+  gui->WorkGroupCombo->SetSelection(0);
+
+  gui->MaxWorkGroupText->SetLabel(wxString::Format(wxT("%i"), (int)gui->PhysicsEngine.maxWorkGroup));
   
   canvas->SetFocus();
 

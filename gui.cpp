@@ -18,10 +18,11 @@ void Gui::InitAfterXRC()
 	viewerWindow=(wxWindow*)FindWindow("osgViewer");
 
 	algorithmChoice=(wxChoice*)FindWindow("AlgorithmChoice");
-	algorithmChoice->Append("None");
-	algorithmChoice->Append("Triangle-triangle");
+	algorithmChoice->Append("Brak");
+	algorithmChoice->Append(wxString::FromUTF8("Trójkąt-trójkąt"));
 	algorithmChoice->SetSelection(1);
 	algorithmChoice->Append("OpenCL");
+	algorithmChoice->Append(wxString::FromUTF8("Trójkąt-trójkąt wszystkie pary"));
 	algorithmChoice->Bind(wxEVT_CHOICE,
 	                      [=](wxCommandEvent& event)
 	                      {
@@ -35,7 +36,24 @@ void Gui::InitAfterXRC()
 		                  CurrentScene=&(Scenes[event.GetInt()]);
 		                  osgViewer->setSceneData(CurrentScene->GroupNode);
 	                  });
-	
+
+	WorkGroupCombo=(wxComboBox*)FindWindow("WorkGroupCombo");
+	WorkGroupCombo->Bind(wxEVT_COMBOBOX,
+	                  [=](wxCommandEvent& event)
+	                  {
+		                  PhysicsEngine.workGroupSize=event.GetInt();
+	                  });
+	WorkGroupCombo->Bind(wxEVT_TEXT_ENTER,
+	                  [=](wxCommandEvent& event)
+	                  {
+		                  int index=wxAtoi(event.GetString());
+		                  if(index>=WorkGroupCombo->GetCount())
+			                  index=0;
+		                  WorkGroupCombo->SetSelection(index);
+		                  PhysicsEngine.workGroupSize=index;
+	                  });
+
+	MaxWorkGroupText=(wxStaticText*)FindWindow("MaxWorkGroupText");
 }
 
 void Gui::onQuitButton(wxCommandEvent& event)

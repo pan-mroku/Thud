@@ -6,6 +6,8 @@
 
 #include <wx/frame.h>
 #include <wx/choice.h>
+#include <wx/combobox.h>
+#include <wx/stattext.h>
 #include <osg/Timer>
 #include <vector>
 
@@ -23,6 +25,8 @@ public:
   std::vector<Scene> Scenes;
   Scene* CurrentScene;
 	wxChoice* SceneChoice;
+	wxComboBox* WorkGroupCombo;
+	wxStaticText* MaxWorkGroupText;
 	Physics PhysicsEngine;
 protected:
   void onQuitButton(wxCommandEvent& event);

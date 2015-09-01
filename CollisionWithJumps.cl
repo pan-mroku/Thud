@@ -285,12 +285,13 @@ void PreMult(double r[3], const global float* V, const global double* mat)
 	r[2] = (mat[4*0+2]*V[0] + mat[4*1+2]*V[1] + mat[4*2+2]*V[2] + mat[4*3+2])*D;
 }
 
-void kernel CollisionWithJumps(global const int* triangleCount, global const double* mA, global const float* vA, global const int* iA, global const double* mB, global const float* vB, global const int* iB, global bool* C)
+void kernel CollisionWithJumps(global const int* triangleCount, global const double* mA, global const float* vA, global const int* iA, global const double* mB, global const float* vB, global const int* iB, global bool* C, global int* debug)
 {
 	int index = get_global_id(0);
-	
-	if(index > triangleCount[2])
+	if(index >= triangleCount[2])
+	{
 		return;
+	}
 	
 	int indexA=index/triangleCount[0];
 	int indexB=index%triangleCount[1];

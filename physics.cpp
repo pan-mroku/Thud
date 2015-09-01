@@ -13,12 +13,18 @@
 
 Physics::Physics():
 	ActiveAlgorithm(COLLISION_ALGORITHM_TRIANGLE),
-	kernelCode("")
+	kernelCode(""),
+	workGroupSize(0)
 {
-
+	std::fstream file("CollisionWithJumps.cl");
+	std::stringstream ss;
+	ss<<file.rdbuf();
+	kernelCode=ss.str();
+	
+	sources.push_back({kernelCode.c_str(), kernelCode.length()});
 }
 
-void Physics::CreateContext(osgCanvas& canvas)
+void Physics::CreateContext()
 {
 	cl::Platform::get(&platforms);
 
@@ -28,13 +34,7 @@ void Physics::CreateContext(osgCanvas& canvas)
 	int err=CL_SUCCESS;
 	context = cl::Context(devices, NULL, NULL, NULL, &err);
 
-	std::string tmp;
-	std::fstream file("CollisionWithJumps.cl");
-	std::stringstream ss;
-	ss<<file.rdbuf();
-	kernelCode=ss.str();
-	
-	sources.push_back({kernelCode.c_str(), kernelCode.length()});
+
 
 	program = cl::Program(context, sources, &err);
 	if(err!=CL_SUCCESS)
@@ -51,14 +51,21 @@ void Physics::CreateContext(osgCanvas& canvas)
 
 	//http://stackoverflow.com/questions/23017005/determine-max-global-work-group-size-based-on-device-memory-in-opencl
 	std::string extensions="";
-	unsigned long memSize=0, maxMemAlloc=0;
+	unsigned long memSize=0, maxMemAlloc=0, localSize=0;
 	size_t computeUnits=0;
+	std::vector<size_t> maxWorkItemSizes;
 	devices[0].getInfo(CL_DEVICE_EXTENSIONS, &extensions);
 	devices[0].getInfo(CL_DEVICE_MAX_COMPUTE_UNITS, &computeUnits);
 	devices[0].getInfo(CL_DEVICE_MAX_MEM_ALLOC_SIZE, &maxMemAlloc);
 	devices[0].getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &memSize);
 	kernel.getWorkGroupInfo(devices[0], CL_KERNEL_WORK_GROUP_SIZE, &maxWorkGroup);
-	std::cerr<<"ext: "<<extensions<<std::endl<<"max units: "<<computeUnits<<" max work group: "<<maxWorkGroup<<" err: "<<err<<" devices: "<<devices.size()<<" max mem alloc: "<<maxMemAlloc<<" global mem size: "<<memSize<<std::endl;
+	kernel.getWorkGroupInfo(devices[0], CL_KERNEL_LOCAL_MEM_SIZE, &localSize);
+		devices[0].getInfo(CL_DEVICE_MAX_WORK_ITEM_SIZES, &maxWorkItemSizes);
+		std::cerr<<"ext: "<<extensions<<std::endl<<"max units: "<<computeUnits<<" max work group: "<<maxWorkGroup<<" err: "<<err<<" devices: "<<devices.size()<<" max mem alloc: "<<maxMemAlloc<<" global mem size: "<<memSize<<" kernel local mem size: "<<localSize<<std::endl;
+	std::cerr<<"Max work item sizes"<<std::endl;
+	for(int i=0; i<maxWorkItemSizes.size(); i++)
+		std::cerr<<maxWorkItemSizes[i]<<" ";
+	std::cerr<<std::endl;
 	
 	//platforms[0].getDevices(CL_DEVICE_TYPE_GPU, &devices);
 	/*	std::string out;
@@ -113,6 +120,13 @@ bool Physics::CheckCollision(const Scene& scene)
 		break;
 	case COLLISION_ALGORITHM_OPENCL:
 		return OpenCLCollisionAlgorithm(scene);
+		break;
+	case COLLISION_ALGORITHM_TRIANGLE_ALL:
+		return TriangleAllCollisionAlgorithm(scene);
+		break;
+	default:
+		std::cerr<<"Unknown collision algorithm"<<std::endl;
+		return false;
 		break;
 	}
 }
@@ -182,6 +196,10 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 	if(err)
 		std::cerr<<err<<std::endl;
 
+	cl::Buffer bufferDebug(context, CL_MEM_WRITE_ONLY, sizeof(int), NULL, &err);
+	if(err)
+		std::cerr<<err<<std::endl;
+
 	//global się musi dzielić przez local, jeśli nie zostawiamy tego do ogarnęcia opencl
 	//0 być nie może. musi być wtedy nullrange
 	kernel.setArg(0, triangleCountBuffer);
@@ -192,19 +210,41 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 	kernel.setArg(5, vertexBufferB);
 	kernel.setArg(6, indexBufferB);
 	kernel.setArg(7, bufferC);
-	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(triangleCountVector[2]), cl::NullRange);
+	kernel.setArg(8, bufferDebug);
+
+	if(workGroupSize==0)
+		err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(triangleCountVector[2]), cl::NullRange);
+	else
+	{
+		int i=triangleCountVector[2]/workGroupSize;
+		while(i*workGroupSize<triangleCountVector[2])
+			i++;
+		err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(i*workGroupSize), cl::NDRange(workGroupSize));
+	}
+	
 	if (err != CL_SUCCESS)
 	{
 		std::cerr<<"Queue error: "<<err<<std::endl;
+		CreateContext();
 		return false;
 	}
 	err = queue.finish();
 	if (err != CL_SUCCESS)
 	{
 		std::cerr<<"Kernel error: "<<err<<std::endl;
+		CreateContext();
 		return false;
 	}
 
+	// int debug=0;
+	// err = queue.enqueueReadBuffer(bufferDebug, CL_TRUE, 0, sizeof(int), &debug);
+	// if (err != CL_SUCCESS)
+	// {
+	// 	std::cerr<<"Debug read error: "<<err<<std::endl;
+	// 	return false;
+	// }
+	// std::cerr<<debug<<std::endl;
+		
 	bool* C;
 	C = new bool[triangleCountVector[2]]; //Bez alokacji w runtime dla 4k*4k rzuca segfaultem (nic dziwnego w sumie)
 	for(int i=0; i<triangleCountVector[2]; i++)
@@ -227,6 +267,17 @@ bool Physics::OpenCLCollisionAlgorithm(const Scene& scene)
 
 	delete[] C;
 	return false;
+}
+
+bool Physics::TriangleAllCollisionAlgorithm(const Scene& scene)
+{
+	bool collision=false;
+	for(OSGTriangler trianglerA(scene.ObjectA); trianglerA.AnyTrianglesLeft; trianglerA.GetNextTriangle())
+		for(OSGTriangler trianglerB(scene.ObjectB); trianglerB.AnyTrianglesLeft; trianglerB.GetNextTriangle())
+			if(NoDivTriTriIsect(trianglerA.v0._v, trianglerA.v1._v, trianglerA.v2._v,
+			                    trianglerB.v0._v, trianglerB.v1._v, trianglerB.v2._v))
+				collision=true;
+	return collision;
 }
 
 bool Physics::CheckSceneCollision(const Scene& scene)

@@ -26,6 +26,7 @@ public:
   void OnSize(wxSizeEvent& event);
   void OnKeyDown(wxKeyEvent& event);
   void OnKeyUp(wxKeyEvent& event);
+	void OnMouseEnter(wxMouseEvent& event);
 
   wxGLContext* Context;
 

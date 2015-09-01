@@ -16,7 +16,8 @@ public:
     {
       COLLISION_ALGORITHM_NONE=0,
       COLLISION_ALGORITHM_TRIANGLE,
-      COLLISION_ALGORITHM_OPENCL
+      COLLISION_ALGORITHM_OPENCL,
+      COLLISION_ALGORITHM_TRIANGLE_ALL,
     } CollisionAlgorithmEnum;
 	
   CollisionAlgorithmEnum ActiveAlgorithm;
@@ -29,14 +30,16 @@ public:
 	cl::Program program;
 	cl::Kernel kernel;
 	size_t maxWorkGroup;
+	int workGroupSize;
 
   void Tick(Scene& scene, const double& miliseconds);
 
-	void CreateContext(osgCanvas& canvas);
+	void CreateContext();
 	
   bool CheckCollision(const Scene& scene);
   bool TriangleCollisionAlgorithm(const Scene& scene);
   bool OpenCLCollisionAlgorithm(const Scene& scene);
+	bool TriangleAllCollisionAlgorithm(const Scene& scene);
 
 	bool CheckSceneCollision(const Scene& scene);
 
