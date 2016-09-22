@@ -3,5 +3,5 @@
 	<scene title="cube" objecta="models/cube.obj" objectb="models/cube.obj" squared_distance="5.1"/>
 	<scene title="sphere" objecta="models/sphere.obj" objectb="models/sphere.obj" squared_distance="9.5"/>
 	<scene title="monkey low" objecta="models/monkey_lowpoly.obj" objectb="models/monkey_lowpoly.obj" squared_distance="8.18"/>
-  <scene title="monkey hi" objecta="models/monkey.obj" objectb="models/monkey.obj" squared_distance="8.18"/>
+  <scene title="monkey high" objecta="models/monkey.obj" objectb="models/monkey.obj" squared_distance="8.18"/>
 </scenes>
